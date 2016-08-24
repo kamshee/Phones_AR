@@ -2,8 +2,8 @@
 
 clear all
 
-nTrees=50;
-nResample=5; % Set to more than 1 to balance classes for training and specify number of resamplings
+nTrees=150;
+nResample=1; % Set to more than 1 to balance classes for training and specify number of resamplings
 TestBalance=0; % Test on imbalanced or balanced classes when resampling test set
 SemiBal=3; % Desired ratio of smallest class to largest
 Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
@@ -70,9 +70,9 @@ if ~TestBalance
         FeatTrain=NewFeatures(TrainInd,2:end);
         LabelTrain=NewLabels(TrainInd);
 
-        TestInd=find(Features(:,1)==indSubj);
-        FeatTest=Features(TestInd,2:end);
-        LabelTest=Labels(TestInd);
+        TestInd=find(NewFeatures(:,1)==indSubj);
+        FeatTest=NewFeatures(TestInd,2:end);
+        LabelTest=NewLabels(TestInd);
 
         RFModel=TreeBagger(nTrees, FeatTrain, LabelTrain);
         [LabelsRF,P_RF] = predict(RFModel,FeatTest);
