@@ -83,6 +83,24 @@ if ~TestBalance
 
         ConfMat{indSubj}=confusionmat(LabelTest, LabelsRF);
         PredLabels{indSubj}=LabelsRF;
+        
+        % Find missing classes and replace them
+        u=unique([LabelTest; LabelsRF]);
+        n_missing=zeros(1,6);
+        for uind=1:length(u)
+            n_missing(strcmp(u(uind),Activities))=1;
+        end
+        z_inds=find(~n_missing);
+        for m=z_inds
+            if m==1
+                ConfMat{indSubj}=[zeros(1,size(ConfMat{indSubj},2)); ConfMat{indSubj}(m:end,:)];
+                ConfMat{indSubj}=[zeros(size(ConfMat{indSubj},1),1) ConfMat{indSubj}(:,m:end)];
+            else
+                ConfMat{indSubj}=[ConfMat{indSubj}(1:m-1,:); zeros(1,size(ConfMat{indSubj},2)); ConfMat{indSubj}(m:end,:)];
+                ConfMat{indSubj}=[ConfMat{indSubj}(:,1:m-1) zeros(size(ConfMat{indSubj},1),1) ConfMat{indSubj}(:,m:end)];
+            end
+        end
+        
     end
 else
     parfor indSubj=1:length(AllFeat)
@@ -105,6 +123,22 @@ else
 
         ConfMat{indSubj}=confusionmat(LabelTest, LabelsRF);
 
+        % Find missing classes and replace them
+        u=unique([LabelTest; LabelsRF]);
+        n_missing=zeros(1,6);
+        for uind=1:length(u)
+            n_missing(strcmp(u(uind),Activities))=1;
+        end
+        z_inds=find(~n_missing);
+        for m=z_inds
+            if m==1
+                ConfMat{indSubj}=[zeros(1,size(ConfMat{indSubj},2)); ConfMat{indSubj}(m:end,:)];
+                ConfMat{indSubj}=[zeros(size(ConfMat{indSubj},1),1) ConfMat{indSubj}(:,m:end)];
+            else
+                ConfMat{indSubj}=[ConfMat{indSubj}(1:m-1,:); zeros(1,size(ConfMat{indSubj},2)); ConfMat{indSubj}(m:end,:)];
+                ConfMat{indSubj}=[ConfMat{indSubj}(:,1:m-1) zeros(size(ConfMat{indSubj},1),1) ConfMat{indSubj}(:,m:end)];
+            end
+        end
     end
 end
 if nResample~=1
