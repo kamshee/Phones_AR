@@ -2,8 +2,6 @@
 % Generates clips from phone data
 % Run after GenerateRawData.m
 
-% TODO: Add Features for barometer data
-
 clear all
 
 AccGyrFeat=131; % Number of features for Acc and Gyr
@@ -12,8 +10,8 @@ BarFeat=5; % Number of features for Bar
 dirname='Z:\RERC- Phones\Server Data\Raw Data\';
 savedirname='Z:\RERC- Phones\Server Data\Clips\';
 
-clipDur=5; % Clip length in s
-clipOverlap=.5; % Percent overlap of clips
+clipDur=4; % Clip length in s
+clipOverlap=(clipDur-1)/clipDur; % Percent overlap of clips
 
 filenames=dir('Z:\RERC- Phones\Server Data\Sorted Data\');
 NotDirectories=cellfun(@(x) x==0, {filenames.isdir});
@@ -52,7 +50,7 @@ parfor indSub=1:length(Subjects)
             clipLength=clipDur*Fs;
             overlapLength=ceil(clipLength*clipOverlap); 
             % Read Raw data
-            SensorData=readtable([dirname Sensor '\' Subject '_' Activity '_RAW.csv']);
+            SensorData=readtable([dirname Sensor '\' Subject '_' Activity '_RAW.csv'],'ReadVariableNames',false);
             SensorData=cell2mat(table2cell(SensorData));
 
             % Pre-allocate clips data
@@ -70,7 +68,7 @@ parfor indSub=1:length(Subjects)
             overlapLength=ceil(clipLength*clipOverlap);
                 
             % Read Raw data
-            SensorData=readtable([dirname '\' Sensor '\' Subject '_' Activity '_RAW.csv']);
+            SensorData=readtable([dirname '\' Sensor '\' Subject '_' Activity '_RAW.csv'],'ReadVariableNames',false);
             SensorData=cell2mat(table2cell(SensorData));
 
             % Pre-allocate clips data
@@ -125,13 +123,13 @@ parfor indSub=1:length(Subjects)
         SubjFeat=[SubjFeat; feat];
     end
     
-    SubjClips=struct('SubjID', Subject,  'ActivityLabel', {Label}, 'Acc', AccData, ...
-        'Gyr', GyrData, 'Bar', BarData, 'SamplingT', 20, 'ClipDur', clipDur, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);
+%     SubjClips=struct('SubjID', Subject,  'ActivityLabel', {Label}, 'Acc', AccData, ...
+%         'Gyr', GyrData, 'Bar', BarData, 'SamplingT', 20, 'ClipDur', clipDur, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);
     SubjFeatures=struct('SubjID', Subject,  'ActivityLabel', {Label}, 'Features', SubjFeat, ...
         'SamplingT', 20, 'ClipDur', clipDur, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);    
 
-    AllClips(indSub)=SubjClips;
+%     AllClips(indSub)=SubjClips;
     AllFeat(indSub)=SubjFeatures;
 end
-save([savedirname 'PhoneData_Clips.mat'],'AllClips', '-v7.3')
+% save([savedirname 'PhoneData_Clips.mat'],'AllClips', '-v7.3')
 save([savedirname 'PhoneData_Feat.mat'],'AllFeat', '-v7.3')

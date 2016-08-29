@@ -2,10 +2,23 @@
 
 clear all
 
-nTrees=150;
-nResample=1; % Set to more than 1 to balance classes for training and specify number of resamplings
+nTrees=50;
+nResample=5; % Set to more than 1 to balance classes for training and specify number of resamplings
 TestBalance=0; % Test on imbalanced or balanced classes when resampling test set
 SemiBal=3; % Desired ratio of smallest class to largest
+rmvGyr=0;
+VarImp=0;
+if VarImp
+    OOB='on';
+else
+    OOB='off';
+end
+if rmvGyr
+    FeatInds=[1:131 263:267];
+else
+    FeatInds=1:267;
+end
+
 Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
 % Activities={'Sitting', 'Lying', 'Standing', 'Walking'};
 numAct=length(Activities);
@@ -25,13 +38,13 @@ for indSubj=1:length(AllFeat)
 end
 Labels=Labels.';
 
+err=cell(1,length(AllFeat));
 %% Balance Classes
 for xInd=1:nResample
 % Count each class
 if nResample==1
     NewFeatures=Features;
     NewLabels=Labels;
-    clear ('Features', 'Labels');
 else
     for i=1:length(Activities)
 
@@ -70,13 +83,20 @@ if ~TestBalance
         FeatTrain=NewFeatures(TrainInd,2:end);
         LabelTrain=NewLabels(TrainInd);
 
-        TestInd=find(NewFeatures(:,1)==indSubj);
-        FeatTest=NewFeatures(TestInd,2:end);
-        LabelTest=NewLabels(TestInd);
+        TestInd=find(Features(:,1)==indSubj);
+        FeatTest=Features(TestInd,2:end);
+        LabelTest=Labels(TestInd);
 
-        RFModel=TreeBagger(nTrees, FeatTrain, LabelTrain);
-        [LabelsRF,P_RF] = predict(RFModel,FeatTest);
+        RFModel=TreeBagger(nTrees, FeatTrain(:, FeatInds), LabelTrain,'OOBVarImp',OOB);
+        [LabelsRF,P_RF] = predict(RFModel,FeatTest(:, FeatInds));
 
+        if VarImp
+            if isempty(err{indSubj})
+                err{indSubj}=zeros(size(RFModel.OOBPermutedVarDeltaError));
+            end
+            err{indSubj} = err{indSubj}+RFModel.OOBPermutedVarDeltaError;
+        end
+        
         TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
         k(indSubj)=length(TPInd);
         Acc(indSubj)=sum(TPInd)/k(indSubj);
@@ -114,9 +134,16 @@ else
         FeatTest=NewFeatures(TestInd,2:end);
         LabelTest=NewLabels(TestInd);
 
-        RFModel=TreeBagger(nTrees, FeatTrain, LabelTrain);
-        [LabelsRF,P_RF] = predict(RFModel,FeatTest);
+        RFModel=TreeBagger(nTrees, FeatTrain(:,FeatInds), LabelTrain,'OOBVarImp',OOB);
+        [LabelsRF,P_RF] = predict(RFModel,FeatTest(:,FeatInds));
 
+        if VarImp
+            if isempty(err{indSubj})
+                err{indSubj}=zeros(size(RFModel.OOBPermutedVarDeltaError));
+            end
+            err{indSubj} = err{indSubj}+RFModel.OOBPermutedVarDeltaError;
+        end
+            
         TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
         k(indSubj)=length(TPInd);
         Acc(indSubj)=sum(TPInd)/k(indSubj);
@@ -164,7 +191,7 @@ end
 
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
-figure; imagesc(ConfMatAll./correctones); colorbar
+figure; imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
 set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
 
