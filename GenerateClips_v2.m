@@ -5,7 +5,7 @@
 clear all
 
 AccGyrFeat=131; % Number of features for Acc and Gyr
-BarFeat=5; % Number of features for Bar
+BarFeat=8; % Number of features for Bar
 
 dirname='Z:\RERC- Phones\Server Data\Raw Data\';
 savedirname='Z:\RERC- Phones\Server Data\Clips\';

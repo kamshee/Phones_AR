@@ -31,4 +31,9 @@ B=X\Y;
 
 fvec=[fvec B(2)]; flab=[flab; 'RegSlope'];
 
+fvec=[fvec range(bar)]; flab=[flab; 'Range'];
+fvec=[fvec std(bar)]; flab=[flab; 'Std'];
+fvec=[fvec iqr(bar)]; flab=[flab; 'IQR'];
+
+
 

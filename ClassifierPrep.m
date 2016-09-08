@@ -2,21 +2,22 @@
 
 clear all
 
-nTrees=50;
-nResample=5; % Set to more than 1 to balance classes for training and specify number of resamplings
+nTrees=200;
+nResample=2; % Set to more than 1 to balance classes for training and specify number of resamplings
 TestBalance=0; % Test on imbalanced or balanced classes when resampling test set
 SemiBal=3; % Desired ratio of smallest class to largest
-rmvGyr=0;
+rmvFeat=1;
 VarImp=0;
 if VarImp
     OOB='on';
 else
     OOB='off';
 end
-if rmvGyr
-    FeatInds=[1:131 263:267];
+if rmvFeat
+    load NormImp
+    FeatInds=find(norm_imp>.25);
 else
-    FeatInds=1:267;
+    FeatInds=1:270;
 end
 
 Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
@@ -196,4 +197,4 @@ set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
 
 
-WAcc=k.'*Acc/sum(k);
+WAcc=sum(diag(ConfMatAll))/sum(sum(ConfMatAll));
