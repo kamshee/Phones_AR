@@ -3,7 +3,7 @@
 clear all
 
 nTrees=200;
-nResample=2; % Set to more than 1 to balance classes for training and specify number of resamplings
+nResample=5; % Set to more than 1 to balance classes for training and specify number of resamplings
 TestBalance=0; % Test on imbalanced or balanced classes when resampling test set
 SemiBal=3; % Desired ratio of smallest class to largest
 rmvFeat=1;
@@ -24,7 +24,7 @@ Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking
 % Activities={'Sitting', 'Lying', 'Standing', 'Walking'};
 numAct=length(Activities);
 
-load('Z:\RERC- Phones\Server Data\Clips\PhoneData_Feat.mat')
+load('Z:\RERC- Phones\Server Data\Clips\10s\PhoneData_Feat.mat')
 
 Features=[];
 Labels={};

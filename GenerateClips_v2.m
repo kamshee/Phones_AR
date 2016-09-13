@@ -8,10 +8,11 @@ AccGyrFeat=131; % Number of features for Acc and Gyr
 BarFeat=8; % Number of features for Bar
 
 dirname='Z:\RERC- Phones\Server Data\Raw Data\';
-savedirname='Z:\RERC- Phones\Server Data\Clips\';
 
-clipDur=4; % Clip length in s
+clipDur=7; % Clip length in s
 clipOverlap=(clipDur-1)/clipDur; % Percent overlap of clips
+
+savedirname=['Z:\RERC- Phones\Server Data\Clips\' num2str(clipDur) 's\'];
 
 filenames=dir('Z:\RERC- Phones\Server Data\Sorted Data\');
 NotDirectories=cellfun(@(x) x==0, {filenames.isdir});
