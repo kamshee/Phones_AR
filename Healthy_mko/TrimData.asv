@@ -19,8 +19,7 @@ axes=[1:3];
 numClips=(length(AccData)-(Cliplen*ClipOverlap))/(Cliplen*(1-ClipOverlap));
 numClips=floor(numClips);
 
-if ~isempty(newStart) && ~isempty(newEnd)
-    Start=newStart; End=newEnd;
+if ~isempty(newStart && newEnd)
     newAccData=AccData(Start*ClipOverlap*Cliplen:End*ClipOverlap*Cliplen,:);
     newGyrData=GyrData(Start*ClipOverlap*Cliplen:End*ClipOverlap*Cliplen,:);
     newBarData=BarData(ceil(Start*ClipOverlap*Cliplen*6/50):floor(End*ClipOverlap*Cliplen*6/50),:);

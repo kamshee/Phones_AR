@@ -66,10 +66,7 @@ for indSet=1:length(Set)
 
     AllRates=[];
 
-    badsub=unique(trimFixInd.Subject);
-    for indBadSub=1:length(badsub)%[1:sy]
-        indSub=badsub(indBadSub);
-        
+    for indSub=unique(trimFixInd.Subject)%[1:sy]
         filenames=AllFilenames;
         ID=IDs{indSub};
         OtherSubjectFiles = cellfun(@(x) ~strcmp(x(1:15),ID), {filenames.name});
@@ -83,12 +80,12 @@ for indSet=1:length(Set)
 
             eval(['indtemp' ActName '=1;']);
 
-%             if plotsonRaw
-%                 figure('name',[num2str(indSub) ' - ' Activity ' Raw'],'Position',get(0,'ScreenSize'));
-%             end
-%             if plotsonClean
-%                 figure('name',[num2str(indSub) ' - ' Activity ' Clean'],'Position',get(0,'ScreenSize'));
-%             end
+            if plotsonRaw
+                figure('name',[num2str(indSub) ' - ' Activity ' Raw'],'Position',get(0,'ScreenSize'));
+            end
+            if plotsonClean
+                figure('name',[num2str(indSub) ' - ' Activity ' Clean'],'Position',get(0,'ScreenSize'));
+            end
 
             filenames=SubjectFilenames;
             OtherActivityFiles = cellfun(@(x) ~strcmp(x(17:16+length(Activity)),Activity), {filenames.name});
@@ -97,12 +94,16 @@ for indSet=1:length(Set)
             %% Read File and Separate Data by Sensor
             SampleRates=zeros(length(filenames),3);
 
-            badtrials=zeros(size(trimFixInd,1),1);
-            badtrials(trimFixInd.Subject==indSub)=trimFixInd.Trial(trimFixInd.Subject==indSub);
+            badtrials=trimFixInd.Trial(trimFixInd.Subject==indSub);
 
             for indFile=1:length(filenames)
-                newStart=trimFixInd.Start(badtrials==indFile);
-                newEnd=trimFixInd.End(badtrials==indFile);
+                if any(badtrials==indFile)
+                    newStart=trimFixInd.Start(badtrials==indFile);
+                    newEnd=trimFixInd.End(badtrials==indFile);
+                    
+                    
+                    
+                end
                 
                 name=filenames(indFile).name;
                 fileinfo=strsplit(name,{'_' '.'});
@@ -172,7 +173,7 @@ for indSet=1:length(Set)
                 trimAcc=zeros(size(Acc));
                 trimGyr=zeros(size(Gyr));
                 trimBar=zeros(size(Bar));
-                [trimAcc,trimGyr,trimBar] = TrimData(Activity,Acc,Gyr,Bar,newStart,newEnd);
+                [trimAcc,trimGyr,trimBar] = TrimData(Activity,Acc,Gyr,Bar);
                 %if strcmp(Activity,'Lying') || strcmp(Activity,'Sitting') || strcmp(Activity,'Standing')
                 %    [trimAcc,trimGyr,trimBar] = TrimData(Activity,trimAcc,trimGyr,trimBar);
                 %end
