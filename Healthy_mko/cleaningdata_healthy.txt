@@ -76,24 +76,6 @@ walking: 10: 1(3844)
 
 
 ------------------------------------------- MKO -------------------------------------
-STAIRS DOWN
-
-
-*** Trim alg ok ***
-
-
-
-*** Trim alg needs fix ***
-
-
-
-*** Throw out ***
-sub 3: 4(1282) - mislabeled (walking)
-
-
-
-
-------------------------------------------- NS -------------------------------------
 STAIRS UP
 
 
@@ -107,8 +89,35 @@ sub 10: 6(4208)
 
 
 
+*** 3s cutoff better ***
+
+
+
 *** Throw out ***
 (3100): mislabeled
+
+
+
+------------------------------------------- NS -------------------------------------
+STAIRS DOWN
+
+
+*** Trim alg ok ***
+
+
+
+*** Trim alg needs fix ***
+
+
+
+*** 3s cutoff better ***
+
+
+
+*** Throw out ***
+sub 3: 4(1282) - mislabeled (walking)
+
+
 
 
 
