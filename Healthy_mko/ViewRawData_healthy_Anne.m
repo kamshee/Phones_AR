@@ -31,7 +31,7 @@ end
 Set={'Sensor_Data_V2'};
 
 %Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'}; %(skip sit-to-stand stand-to-sit, Wheeling)
-Activities={'Stairs Down'};
+Activities={'Stairs Up'};
 
 %load('Z:\Stroke MC10\Sessions.mat')
 %Labels=table2cell(readtable('Z:\RERC- Phones\Stroke\Labels_stroke.csv','ReadVariableNames',false));
@@ -67,7 +67,7 @@ for indSet=1:length(Set)
     AllRates=[];
 
     badsub=unique(trimFixInd.Subject);
-    for indBadSub=1:length(badsub)%[1:sy]
+    for indBadSub=3%1:length(badsub)%[1:sy]
         indSub=badsub(indBadSub);
         
         filenames=AllFilenames;
@@ -100,7 +100,7 @@ for indSet=1:length(Set)
             %badtrials=zeros(size(trimFixInd,1),1);
             %badtrials(trimFixInd.Subject==indSub)=trimFixInd.Trial(trimFixInd.Subject==indSub);
             newStart=[]; newEnd=[];
-            for indFile=1:length(filenames)              
+            for indFile=2%1:length(filenames)              
                 %newStart=trimFixInd.Start(badtrials==indFile);
                 %newEnd=trimFixInd.End(badtrials==indFile);
                 
@@ -169,9 +169,6 @@ for indSet=1:length(Set)
                 Bar=[t_bar',spline(Bar(:,1).',Bar(:,2).',t_bar).'];
 
                 % Trim to activity only (remove movement bursts during labeling pre- and post- activity)
-                trimAcc=zeros(size(Acc));
-                trimGyr=zeros(size(Gyr));
-                trimBar=zeros(size(Bar));
                 [trimAcc,trimGyr,trimBar] = TrimData(Activity,Acc,Gyr,Bar,newStart,newEnd);
                 %if strcmp(Activity,'Lying') || strcmp(Activity,'Sitting') || strcmp(Activity,'Standing')
                 %    [trimAcc,trimGyr,trimBar] = TrimData(Activity,trimAcc,trimGyr,trimBar);
@@ -196,14 +193,18 @@ for indSet=1:length(Set)
                 end
                 %% Save Files
                 if saveTrim
-                    csvwrite([dirmain 'TrimmedData\badsub\Acc\' filenames(indFile).name],trimAcc)
-                    csvwrite([dirmain 'TrimmedData\badsub\Gyr\' filenames(indFile).name],trimGyr)
-                    csvwrite([dirmain 'TrimmedData\badsub\Bar\' filenames(indFile).name],trimBar)
+                    if any(trimAcc)
+                        csvwrite([dirmain 'TrimmedData\badsub\Acc\' filenames(indFile).name],trimAcc)
+                        csvwrite([dirmain 'TrimmedData\badsub\Gyr\' filenames(indFile).name],trimGyr)
+                        csvwrite([dirmain 'TrimmedData\badsub\Bar\' filenames(indFile).name],trimBar)
+                    end
                 end
                 
                 if saveOrient
-                    csvwrite([dirmain 'TrimmedData\badsub\Reoriented\Acc\' filenames(indFile).name],rotAcc)
-                    csvwrite([dirmain 'TrimmedData\badsub\Reoriented\Gyr\' filenames(indFile).name],rotGyr)
+                    if any(trimAcc)
+                        csvwrite([dirmain 'TrimmedData\badsub\Reoriented\Acc\' filenames(indFile).name],rotAcc)
+                        csvwrite([dirmain 'TrimmedData\badsub\Reoriented\Gyr\' filenames(indFile).name],rotGyr)
+                    end
                 end
 
                 %% Plot activity trials

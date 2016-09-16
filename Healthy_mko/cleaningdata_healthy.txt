@@ -76,25 +76,81 @@ walking: 10: 1(3844)
 
 
 ------------------------------------------- MKO -------------------------------------
+r=.7;
+X=find(s<0.15 | s>.4);
+bursts=diff(X)<7;
+cutOffShort=1;
+cutOffLong=3;
+
 STAIRS UP
 
 
 *** Trim alg ok ***
-
+sub 10: 11(4451)
+sub 10: 10(4448)
+sub 10: 9(4441)
+sub 10: 8(4333)
+sub 10: 7(4327)
+sub 10: 4(4108)
+sub 10: 1(3840)
+sub 9: 20(539)
+sub 9: 19(527)
+sub 9: 18(482)
+sub 9: 17(478)
+sub 9: 16(3119)
+sub 9: 15(3117)
+sub 9: 13(3096)
+sub 9: 12(2723)
+sub 9: 9(2605)
+sub 3: 17(2581)
+sub 3: 14(2374)
+sub 3: 13(2367)
+sub 3: 12(2366)
+sub 3: 11(2172)
+sub 3: 10(2001)
+sub 3: 3(1285)
 
 
 *** Trim alg needs fix ***
-sub 10: 4451
-sub 10: 6(4208)
-
-
-
-*** 3s cutoff better ***
-
+sub 10: 12(4455): End=10;
+sub 10: 6(4208): Start=205; End=219;
+sub 10: 5(4110): End=12;
+sub 10: 3(4048): End=12;
+sub 10: 2(4042): Start=3; End=14;  (3s cutoff would be fine)
+sub 9: 11(2721): Start=6;
+sub 9: 8(2362): Start=2; End=10;
+sub 9: 7(2360): Start=6;
+sub 9: 6(2146): Start=2; End=10;
+sub 9: 5(2144): Start=2; End=10;
+sub 3: 16(251): Start=9; End=57;
+sub 3: 15(250): Start=10; End=33;
+sub 3: 4(1289): Start=5; End=35;
+sub 3: 2(1281): Start=2;
+sub 3: 1(1269): End=40;
 
 
 *** Throw out ***
-(3100): mislabeled
+None
+
+
+*** Too short ***
+sub 9: 14(3100): empty
+sub 9: 10(2607): empty
+sub 9: 4(2051): empty
+sub 9: 3(2048): empty
+sub 9: 2(1800): empty
+sub 9: 1(1798): empty
+sub 3: 21(2910): empty
+sub 3: 21(2910): empty
+sub 3: 21(2910): empty
+sub 3: 20(2907): empty
+sub 3: 19(2774): empty
+sub 3: 18(2772): empty
+sub 3: 9(1999): empty
+sub 3: 8(1739): empty
+sub 3: 7(1737): empty
+sub 3: 6(1424): empty
+sub 3: 5(1422): empty
 
 
 

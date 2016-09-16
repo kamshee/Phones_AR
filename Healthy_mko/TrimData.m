@@ -115,8 +115,8 @@ if strcmp(Activity,'Lying') || strcmp(Activity,'Sitting') || strcmp(Activity,'St
 % AMBULATORY ACTIVITIES
 else
 
-    cutOffShort=2;
-    cutOffLong=5;
+    cutOffShort=1;
+    cutOffLong=3;
     
     r=.7;
 

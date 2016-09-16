@@ -5,18 +5,27 @@
 clear all
 close all
 
-dirname = 'Z:\RERC- Phones\Server Data\Sorted Data\';
-WindowSize=3; %Length in s of window around data
+flag_badsub=0;
 
-
+if flag_badsub
+    dirname = 'Z:\RERC- Phones\Server Data\TrimmedData\badsub\';
+    WindowSize=0; %Length in s of window around data
+else
+    dirname = 'Z:\RERC- Phones\Server Data\Sorted Data\';
+    WindowSize=3; %Length in s of window around data
+end
 %% Search Directory for Subject Directories and Save the Subject IDs in Array
-filenames=dir(dirname);
+filenames= dir('Z:\RERC- Phones\Server Data\TrimmedData\badsub\');%dir(dirname);
 NotDirectories=cellfun(@(x) x==0, {filenames.isdir});
 filenames(NotDirectories)=[];
 filenames=filenames(cellfun(@(x) strcmp(x(1),'3'), {filenames.name}));
+
 Subjects={filenames.name};
 
 Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
+% If fixing badsub, change Activities to bad Activities too
+%Activities={'Stairs Up', 'Stairs Down', 'Walking'};
+
 % Sensors={'Bar'};
 % Fss=6;
 Sensors={'Acc', 'Gyr', 'Bar'};
@@ -49,6 +58,9 @@ for indSens=1:length(Sensors)
                 SensorData=readtable([dirname Subject '\' Activity '\' Sensor '\' filenames(i).name]);
                 SensorData=cell2mat(table2cell(SensorData));
 
+                if ~any(SensorData)
+                    continue
+                end
                 SensorData(:,1)=SensorData(:,1)-SensorData(1,1);
 
                 %% Average and remove duplicate timestamps

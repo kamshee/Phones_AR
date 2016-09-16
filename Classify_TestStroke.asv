@@ -60,6 +60,7 @@ end
 
 indHomeStart=length(TestFeatures);
 
+% Healthy --> Stroke Home
 load('Z:\RERC- Phones\Stroke\Clips\Home_Feat.mat')
 
 for indSubj=1:length(AllFeat)
@@ -73,16 +74,15 @@ end
 
 TestLabels=TestLabels.';
 
-FeatTrain=Features(:,2:end);
-LabelTrain=Labels;
 
-% Healthy --> Stroke all
+FeatTrain=NewFeatures(:,2:end);
+LabelTrain=NewLabels;
+
 FeatTest=TestFeatures(:,2:end);
 LabelTest=TestLabels;
 
-t = templateTree('MinLeafSize',5);
-RFModel=fitensemble(FeatTrain,LabelTrain,'RUSBoost',ntrees,t,'LearnRate',0.1);
-LabelsRF = predict(RFModel,FeatTest);
+RFModel=TreeBagger(nTrees, FeatTrain, LabelTrain);
+[LabelsRF,P_RF] = predict(RFModel,FeatTest);
 
 TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
 k=length(TPInd);
@@ -96,34 +96,6 @@ correctones = repmat(correctones,[1 6]);
 figure; imagesc(ConfMat./correctones); colorbar
 set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
-
-savefig('ConfusionMat_strokeAll')
-save('ConfusionMat_strokeAll.mat',ConfMat)
-
-
-% Healthy --> Stroke Home
-FeatTest=TestFeatures(indHomeStart+1:end,2:end);
-LabelTest=TestLabels(indHomeStart+1:end);
-
-t = templateTree('MinLeafSize',5);
-RFModel=fitensemble(FeatTrain,LabelTrain,'RUSBoost',ntrees,t,'LearnRate',0.1);
-LabelsRF = predict(RFModel,FeatTest);
-
-TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
-k=length(TPInd);
-Acc=sum(TPInd)/k;
-
-ConfMat=confusionmat(LabelTest, LabelsRF);
-PredLabels=LabelsRF;
-
-correctones = sum(ConfMat,2);
-correctones = repmat(correctones,[1 6]);
-figure; imagesc(ConfMat./correctones); colorbar
-set(gca,'XTickLabels',Activities)
-set(gca,'YTickLabels',Activities)
-
-savefig('ConfusionMat_strokeHome')
-save('ConfusionMat_strokeHome.mat',ConfMat)
 
 %% Calculations to evaluate models
 % for i=1:length(AllFeat) 
