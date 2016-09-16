@@ -28,7 +28,7 @@ if ~isempty(newStart) && ~isempty(newEnd)
 end
 
 
-if numClips<=5
+if numClips<=8
     % Change in future: if not enough clips, just return w/o saving
     newAccData=zeros(size(AccData));
     newGyrData=zeros(size(GyrData));
@@ -115,8 +115,8 @@ if strcmp(Activity,'Lying') || strcmp(Activity,'Sitting') || strcmp(Activity,'St
 % AMBULATORY ACTIVITIES
 else
 
-    cutOffShort=4;
-    cutOffLong=10;
+    cutOffShort=2;
+    cutOffLong=5;
     
     r=.7;
 
@@ -136,11 +136,9 @@ else
 %             [val,X]=findpeaks(s);
 %             rmvinds=find(val<.5);
 %             X(rmvinds)=[];
-    if strcmp(Activity,'Walking')
-        X=find(s<0.1 | s>.7);
-    else
-        X=find(s>.7);
-    end
+
+    X=find(s<0.15 | s>.4);
+
         
         
     if isempty(X)

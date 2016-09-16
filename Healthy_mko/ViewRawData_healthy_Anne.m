@@ -31,7 +31,7 @@ end
 Set={'Sensor_Data_V2'};
 
 %Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'}; %(skip sit-to-stand stand-to-sit, Wheeling)
-Activities={'Walking'};
+Activities={'Stairs Down'};
 
 %load('Z:\Stroke MC10\Sessions.mat')
 %Labels=table2cell(readtable('Z:\RERC- Phones\Stroke\Labels_stroke.csv','ReadVariableNames',false));
@@ -97,12 +97,12 @@ for indSet=1:length(Set)
             %% Read File and Separate Data by Sensor
             SampleRates=zeros(length(filenames),3);
 
-            badtrials=zeros(size(trimFixInd,1),1);
-            badtrials(trimFixInd.Subject==indSub)=trimFixInd.Trial(trimFixInd.Subject==indSub);
-
-            for indFile=1:length(filenames)
-                newStart=trimFixInd.Start(badtrials==indFile);
-                newEnd=trimFixInd.End(badtrials==indFile);
+            %badtrials=zeros(size(trimFixInd,1),1);
+            %badtrials(trimFixInd.Subject==indSub)=trimFixInd.Trial(trimFixInd.Subject==indSub);
+            newStart=[]; newEnd=[];
+            for indFile=1:length(filenames)              
+                %newStart=trimFixInd.Start(badtrials==indFile);
+                %newEnd=trimFixInd.End(badtrials==indFile);
                 
                 name=filenames(indFile).name;
                 fileinfo=strsplit(name,{'_' '.'});
@@ -179,8 +179,7 @@ for indSet=1:length(Set)
 
                 %% Orientation
                 % Sedentary activities
-                %if strcmp(Activity,'Lying') || strcmp(Activity,'Sitting') || strcmp(Activity,'Standing')
-
+                if size(trimAcc,1)>1
                     % compile average trimmed data of each trial
                     eval(['Acc_trialavg_' ActName '(indtemp' ActName ',1)=Index;']);
                     eval(['Acc_trialavg_' ActName '(indtemp' ActName ',2:4)=mean(trimAcc(:,2:4));']);
@@ -194,17 +193,17 @@ for indSet=1:length(Set)
 
                     % increment trial index
                     eval(['indtemp' ActName '=indtemp' ActName '+1;']);
-                %end
+                end
                 %% Save Files
                 if saveTrim
-                    csvwrite([dirmain 'TrimmedData\Acc\' filenames(indFile).name],trimAcc)
-                    csvwrite([dirmain 'TrimmedData\Gyr\' filenames(indFile).name],trimGyr)
-                    csvwrite([dirmain 'TrimmedData\Bar\' filenames(indFile).name],trimBar)
+                    csvwrite([dirmain 'TrimmedData\badsub\Acc\' filenames(indFile).name],trimAcc)
+                    csvwrite([dirmain 'TrimmedData\badsub\Gyr\' filenames(indFile).name],trimGyr)
+                    csvwrite([dirmain 'TrimmedData\badsub\Bar\' filenames(indFile).name],trimBar)
                 end
                 
                 if saveOrient
-                    csvwrite([dirmain 'TrimmedData\Reoriented\Acc\' filenames(indFile).name],rotAcc)
-                    csvwrite([dirmain 'TrimmedData\Reoriented\Gyr\' filenames(indFile).name],rotGyr)
+                    csvwrite([dirmain 'TrimmedData\badsub\Reoriented\Acc\' filenames(indFile).name],rotAcc)
+                    csvwrite([dirmain 'TrimmedData\badsub\Reoriented\Gyr\' filenames(indFile).name],rotGyr)
                 end
 
                 %% Plot activity trials
@@ -223,64 +222,65 @@ for indSet=1:length(Set)
                     figcol = figcol * numsensors;   % 3X columns for 3 sensors: Accel, Gyro, Bar
                     indPlot = numsensors*(indFile-1)+1;
 
-                    figure;
-                    figrow=1; figcol=3; indPlot=1;
-                    if plotsonRaw
-                        % accelerometer
-                        subplot(figrow,figcol,indPlot); hold on;
-                            plot(Acc(:,1)/1000,Acc(:,2),'r-'); % x
-                            plot(Acc(:,1)/1000,Acc(:,3),'g-'); % y
-                            plot(Acc(:,1)/1000,Acc(:,4),'b-'); % z
-                            %ylabel('Acc');
+                    figure('name',[num2str(indSub) ' - ' Activity ' Raw'],'Position',get(0,'ScreenSize'));
+                    if ~isempty(trimAcc)
+                        figrow=1; figcol=3; indPlot=1;
+                        if plotsonRaw
+                            % accelerometer
+                            subplot(figrow,figcol,indPlot); hold on;
+                                plot(Acc(:,1)/1000,Acc(:,2),'r-'); % x
+                                plot(Acc(:,1)/1000,Acc(:,3),'g-'); % y
+                                plot(Acc(:,1)/1000,Acc(:,4),'b-'); % z
+                                %ylabel('Acc');
 
-                            plot([trimAcc(1,1)/1000 trimAcc(1,1)/1000],[-20 20],'r--'); % Trim start
-                            plot([trimAcc(end,1)/1000 trimAcc(end,1)/1000],[-20 20],'r--'); % Trim end
+                                plot([trimAcc(1,1)/1000 trimAcc(1,1)/1000],[-20 20],'r--'); % Trim start
+                                plot([trimAcc(end,1)/1000 trimAcc(end,1)/1000],[-20 20],'r--'); % Trim end
 
-                        % gyroscope
-                        subplot(figrow,figcol,indPlot+1); hold on;
-                            plot(Gyr(:,1)/1000,Gyr(:,2),'r-'); % rot about x
-                            plot(Gyr(:,1)/1000,Gyr(:,3),'g-'); % rot about y
-                            plot(Gyr(:,1)/1000,Gyr(:,4),'b-'); % rot about z
-                            %ylabel('Gyr'); xlabel('Time (s)')
+                            % gyroscope
+                            subplot(figrow,figcol,indPlot+1); hold on;
+                                plot(Gyr(:,1)/1000,Gyr(:,2),'r-'); % rot about x
+                                plot(Gyr(:,1)/1000,Gyr(:,3),'g-'); % rot about y
+                                plot(Gyr(:,1)/1000,Gyr(:,4),'b-'); % rot about z
+                                %ylabel('Gyr'); xlabel('Time (s)')
 
-                            plot([trimGyr(1,1)/1000 trimAcc(1,1)/1000],[-10 10],'r--'); % Trim start
-                            plot([trimGyr(end,1)/1000 trimAcc(end,1)/1000],[-10 10],'r--'); % Trim end
+                                plot([trimGyr(1,1)/1000 trimAcc(1,1)/1000],[-10 10],'r--'); % Trim start
+                                plot([trimGyr(end,1)/1000 trimAcc(end,1)/1000],[-10 10],'r--'); % Trim end
 
-                            title(['Trial ' num2str(Index)]);
+                                title(['ind: ' num2str(indFile) ', Trial ' num2str(Index)]);
 
-                        % barometer
-                        subplot(figrow,figcol,indPlot+2); hold on;
-                            plot(Bar(:,1)/1000,Bar(:,2),'k-','Linewidth',2); % mag
+                            % barometer
+                            subplot(figrow,figcol,indPlot+2); hold on;
+                                plot(Bar(:,1)/1000,Bar(:,2),'k-','Linewidth',2); % mag
 
-                            plot([trimBar(1,1)/1000 trimBar(1,1)/1000],[979 989],'r--'); % Trim start
-                            plot([trimBar(end,1)/1000 trimBar(end,1)/1000],[979 989],'r--'); % Trim end
-                            %ylabel('Bar');
+                                plot([trimBar(1,1)/1000 trimBar(1,1)/1000],[979 989],'r--'); % Trim start
+                                plot([trimBar(end,1)/1000 trimBar(end,1)/1000],[979 989],'r--'); % Trim end
+                                %ylabel('Bar');
+                        end
+
+                        if plotsonClean
+                            % accelerometer
+                            subplot(figrow,figcol,indPlot); hold on;
+                                plot(rotAcc(:,1)/1000,rotAcc(:,2),'r-'); % x
+                                plot(rotAcc(:,1)/1000,rotAcc(:,3),'g-'); % y
+                                plot(rotAcc(:,1)/1000,rotAcc(:,4),'b-'); % z
+                                %ylabel('Acc');
+
+                            % gyroscope
+                            subplot(figrow,figcol,indPlot+1); hold on;
+                                plot(rotGyr(:,1)/1000,rotGyr(:,2),'r-'); % rot about x
+                                plot(rotGyr(:,1)/1000,rotGyr(:,3),'g-'); % rot about y
+                                plot(rotGyr(:,1)/1000,rotGyr(:,4),'b-'); % rot about z
+                                %ylabel('Gyr'); xlabel('Time (s)')
+
+                                title(['Trial ' num2str(Index)]);
+
+                            % barometer
+                            subplot(figrow,figcol,indPlot+2); hold on;
+                                plot(trimBar(:,1)/1000,trimBar(:,2),'k-','Linewidth',2); % mag
+                                %ylabel('Bar');
+                        end
+
                     end
-
-                    if plotsonClean
-                        % accelerometer
-                        subplot(figrow,figcol,indPlot); hold on;
-                            plot(rotAcc(:,1)/1000,rotAcc(:,2),'r-'); % x
-                            plot(rotAcc(:,1)/1000,rotAcc(:,3),'g-'); % y
-                            plot(rotAcc(:,1)/1000,rotAcc(:,4),'b-'); % z
-                            %ylabel('Acc');
-
-                        % gyroscope
-                        subplot(figrow,figcol,indPlot+1); hold on;
-                            plot(rotGyr(:,1)/1000,rotGyr(:,2),'r-'); % rot about x
-                            plot(rotGyr(:,1)/1000,rotGyr(:,3),'g-'); % rot about y
-                            plot(rotGyr(:,1)/1000,rotGyr(:,4),'b-'); % rot about z
-                            %ylabel('Gyr'); xlabel('Time (s)')
-
-                            title(['Trial ' num2str(Index)]);
-
-                        % barometer
-                        subplot(figrow,figcol,indPlot+2); hold on;
-                            plot(trimBar(:,1)/1000,trimBar(:,2),'k-','Linewidth',2); % mag
-                            %ylabel('Bar');
-                    end
-
-
                 end
                 
 
