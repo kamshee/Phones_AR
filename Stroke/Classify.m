@@ -76,6 +76,38 @@ for indFold=1:length(Home)
         end
     end
     
+    LabConfMat=ConfMat;
+    
+    for i=1:length(Home)
+        if i==indFold; continue; end;
+        Feat=[Feat; Home(i).Features];
+        Label=[Label Home(i).ActivityLabel];
+    end
+    
+    t = templateTree('MinLeafSize',5);
+    RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
+    LabelsRF = predict(RFModel,TestFeat);
+    ConfMat{indFold}=confusionmat(TestLabel, LabelsRF);
+    
+    % Find missing classes and replace them
+    u=unique([TestLabel; LabelsRF]);
+    n_missing=zeros(1,6);
+    for uind=1:length(u)
+        n_missing(strcmp(u(uind),Activities))=1;
+    end
+    z_inds=find(~n_missing);
+    for m=z_inds
+        if m==1
+            ConfMat{indFold}=[zeros(1,size(ConfMat{indFold},2)); ConfMat{indFold}(m:end,:)];
+            ConfMat{indFold}=[zeros(size(ConfMat{indFold},1),1) ConfMat{indFold}(:,m:end)];
+        else
+            ConfMat{indFold}=[ConfMat{indFold}(1:m-1,:); zeros(1,size(ConfMat{indFold},2)); ConfMat{indFold}(m:end,:)];
+            ConfMat{indFold}=[ConfMat{indFold}(:,1:m-1) zeros(size(ConfMat{indFold},1),1) ConfMat{indFold}(:,m:end)];
+        end
+    end
+    
+    LabHomeConfMat=ConfMat;
+    
 end
 
 
@@ -93,4 +125,4 @@ set(gca,'XTick',[1 2 3 4 5 6])
 set(gca,'YTick',[1 2 3 4 5 6])
 
 savefig('ConfusionMat_strokestrokeHome')
-save('ConfusionMat_strokestrokeHome.mat',ConfMatAll)
+save('ConfusionMat_strokestrokeHome.mat','LabConfMat', 'LabHomeConfMat')

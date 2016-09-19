@@ -16,7 +16,7 @@ Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking
 % Activities={'Sitting', 'Lying', 'Standing', 'Walking'};
 numAct=length(Activities);
 
-load('Z:\RERC- Phones\Server Data\Clips\PhoneData_Feat.mat')
+load('Z:\RERC- Phones\Server Data\Clips\10s\PhoneData_Feat.mat')
 
 Features=[];
 Labels={};

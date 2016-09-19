@@ -22,9 +22,9 @@ filenames=filenames(cellfun(@(x) strcmp(x(1),'3'), {filenames.name}));
 
 Subjects={filenames.name};
 
-Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
+% Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
 % If fixing badsub, change Activities to bad Activities too
-%Activities={'Stairs Up', 'Stairs Down', 'Walking'};
+Activities={'Sitting', 'Lying', 'Standing'};
 
 % Sensors={'Bar'};
 % Fss=6;
@@ -55,7 +55,7 @@ for indSens=1:length(Sensors)
             SensorRaw=[];
 
             for i=1:length(filenames)
-                SensorData=readtable([dirname Subject '\' Activity '\' Sensor '\' filenames(i).name]);
+                SensorData=readtable([dirname Subject '\' Activity '\' Sensor '\' filenames(i).name],'ReadVariableNames',false);
                 SensorData=cell2mat(table2cell(SensorData));
 
                 if ~any(SensorData)
@@ -83,7 +83,7 @@ for indSens=1:length(Sensors)
                 if strcmp(Sensor,'Bar')
                     SensorData=spline((SensorData(:,1).')./1000,SensorData(:,2).',t);
                 else
-                    SensorData=spline((SensorData(:,1).')./1000,SensorData(:,2:end-1).',t);
+                    SensorData=spline((SensorData(:,1).')./1000,SensorData(:,2:end).',t);
                 end
                 SensorData=SensorData.';
 

@@ -68,18 +68,52 @@ for indFold=1:length(Home)
     z_inds=find(~n_missing);
     for m=z_inds
         if m==1
-            ConfMat{indSubj}=[zeros(1,size(ConfMat{indSubj},2)); ConfMat{indSubj}(m:end,:)];
-            ConfMat{indSubj}=[zeros(size(ConfMat{indSubj},1),1) ConfMat{indSubj}(:,m:end)];
+            ConfMat{indFold}=[zeros(1,size(ConfMat{indFold},2)); ConfMat{indFold}(m:end,:)];
+            ConfMat{indFold}=[zeros(size(ConfMat{indFold},1),1) ConfMat{indFold}(:,m:end)];
         else
-            ConfMat{indSubj}=[ConfMat{indSubj}(1:m-1,:); zeros(1,size(ConfMat{indSubj},2)); ConfMat{indSubj}(m:end,:)];
-            ConfMat{indSubj}=[ConfMat{indSubj}(:,1:m-1) zeros(size(ConfMat{indSubj},1),1) ConfMat{indSubj}(:,m:end)];
+            ConfMat{indFold}=[ConfMat{indFold}(1:m-1,:); zeros(1,size(ConfMat{indFold},2)); ConfMat{indFold}(m:end,:)];
+            ConfMat{indFold}=[ConfMat{indFold}(:,1:m-1) zeros(size(ConfMat{indFold},1),1) ConfMat{indFold}(:,m:end)];
+        end
+    end
+    
+    LabConfMat=ConfMat;
+    
+    for i=1:length(Home)
+        if i==indFold; continue; end;
+        Feat=[Feat; Test(i).Features];
+        Label=[Label Test(i).ActivityLabel];
+    end
+    
+    t = templateTree('MinLeafSize',5);
+    RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
+    LabelsRF = predict(RFModel,TestFeat);
+    ConfMat{indFold}=confusionmat(TestLabel, LabelsRF);
+    
+    % Find missing classes and replace them
+    u=unique([TestLabel; LabelsRF]);
+    n_missing=zeros(1,6);
+    for uind=1:length(u)
+        n_missing(strcmp(u(uind),Activities))=1;
+    end
+    z_inds=find(~n_missing);
+    for m=z_inds
+        if m==1
+            ConfMat{indFold}=[zeros(1,size(ConfMat{indFold},2)); ConfMat{indFold}(m:end,:)];
+            ConfMat{indFold}=[zeros(size(ConfMat{indFold},1),1) ConfMat{indFold}(:,m:end)];
+        else
+            ConfMat{indFold}=[ConfMat{indFold}(1:m-1,:); zeros(1,size(ConfMat{indFold},2)); ConfMat{indFold}(m:end,:)];
+            ConfMat{indFold}=[ConfMat{indFold}(:,1:m-1) zeros(size(ConfMat{indFold},1),1) ConfMat{indFold}(:,m:end)];
         end
     end
     
 end
 
 
-ConfMatAll=sum(ConfMat,3);
+for i=1:size(ConfMat,3)
+    ConfMatAll(:,:,i)=ConfMat{i};
+end
+ConfMatAll=sum(ConfMatAll,3);
+
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
 figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
@@ -89,4 +123,4 @@ set(gca,'XTick',[1 2 3 4 5 6])
 set(gca,'YTick',[1 2 3 4 5 6])
 
 savefig('ConfusionMat_strokestrokeHome')
-save('ConfusionMat_strokestrokeHome.mat',ConfMatAll)
+save('ConfusionMat_strokestrokeHome.mat','LabConfMat', 'LabHomeConfMat')
