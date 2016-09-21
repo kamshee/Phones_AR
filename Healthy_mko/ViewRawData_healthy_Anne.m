@@ -13,7 +13,7 @@ clear all
 
 tic
 
-saveTrim=0;
+saveTrim=1;
 saveOrient=0;
 
 dirmain='Z:\RERC- Phones\Server Data\';
@@ -31,13 +31,14 @@ end
 Set={'Sensor_Data_V2'};
 
 %Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'}; %(skip sit-to-stand stand-to-sit, Wheeling)
-Activities={'Stairs Up'};
+Activities={'Standing'};
 
 %load('Z:\Stroke MC10\Sessions.mat')
 %Labels=table2cell(readtable('Z:\RERC- Phones\Stroke\Labels_stroke.csv','ReadVariableNames',false));
 
 % Manual trim fixes
-trimFixInd=readtable('trimfixes.csv');
+trimFixIndAll=readtable('trimfixes.csv');
+
 
 
 for indSet=1:length(Set)
@@ -66,8 +67,8 @@ for indSet=1:length(Set)
 
     AllRates=[];
 
-    badsub=unique(trimFixInd.Subject);
-    for indBadSub=3%1:length(badsub)%[1:sy]
+    badsub=unique(trimFixIndAll.Subject);
+    for indBadSub=1:length(badsub)%[1:sy]
         indSub=badsub(indBadSub);
         
         filenames=AllFilenames;
@@ -81,6 +82,8 @@ for indSet=1:length(Set)
             Activity=Activities{indAct};
             ActName=strrep(Activity,' ',''); % remove spaces from activity names (e.g. for variable names)
 
+            trimFixInd=trimFixIndAll(strcmp(Activity,trimFixIndAll.Activity),:);
+            
             eval(['indtemp' ActName '=1;']);
 
 %             if plotsonRaw
@@ -97,12 +100,12 @@ for indSet=1:length(Set)
             %% Read File and Separate Data by Sensor
             SampleRates=zeros(length(filenames),3);
 
-            %badtrials=zeros(size(trimFixInd,1),1);
-            %badtrials(trimFixInd.Subject==indSub)=trimFixInd.Trial(trimFixInd.Subject==indSub);
+            badtrials=zeros(size(trimFixInd,1),1);
+            badtrials(trimFixInd.Subject==indSub)=trimFixInd.Trial(trimFixInd.Subject==indSub);
             newStart=[]; newEnd=[];
-            for indFile=2%1:length(filenames)              
-                %newStart=trimFixInd.Start(badtrials==indFile);
-                %newEnd=trimFixInd.End(badtrials==indFile);
+            for indFile=1:length(filenames)              
+                newStart=trimFixInd.Start(badtrials==indFile);
+                newEnd=trimFixInd.End(badtrials==indFile);
                 
                 name=filenames(indFile).name;
                 fileinfo=strsplit(name,{'_' '.'});

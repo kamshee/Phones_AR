@@ -9,7 +9,7 @@ BarFeat=8; % Number of features for Bar
 
 dirname='Z:\RERC- Phones\Server Data\Raw Data\';
 
-clipDur=7; % Clip length in s
+clipDur=10; % Clip length in s
 clipOverlap=(clipDur-1)/clipDur; % Percent overlap of clips
 
 savedirname=['Z:\RERC- Phones\Server Data\Clips\' num2str(clipDur) 's\'];
@@ -101,25 +101,25 @@ parfor indSub=1:length(Subjects)
             end
             % Stores Clip Data with other data from the same sensor and
             % subject
-            if indSens==1
-                [~,~,sz]=size(AccData);
-                if sz==1
-                    sz=0;
-                end
-                AccData(:,:,sz+1:sz+numClips)=clipData;
-            elseif indSens==2
-                [~,~,sz]=size(GyrData);
-                if sz==1
-                    sz=0;
-                end
-                GyrData(:,:,sz+1:sz+numClips)=clipData;
-            elseif indSens==3
-                [~,~,sz]=size(BarData);
-                if sz==1
-                    sz=0;
-                end
-                BarData(:,:,sz+1:sz+numClips)=clipData;
-            end
+%             if indSens==1
+%                 [~,~,sz]=size(AccData);
+%                 if sz==1
+%                     sz=0;
+%                 end
+%                 AccData(:,:,sz+1:sz+numClips)=clipData;
+%             elseif indSens==2
+%                 [~,~,sz]=size(GyrData);
+%                 if sz==1
+%                     sz=0;
+%                 end
+%                 GyrData(:,:,sz+1:sz+numClips)=clipData;
+%             elseif indSens==3
+%                 [~,~,sz]=size(BarData);
+%                 if sz==1
+%                     sz=0;
+%                 end
+%                 BarData(:,:,sz+1:sz+numClips)=clipData;
+%             end
         end
         SubjFeat=[SubjFeat; feat];
     end

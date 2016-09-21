@@ -5,7 +5,7 @@
 clear all
 close all
 
-flag_badsub=0;
+flag_badsub=1;
 
 if flag_badsub
     dirname = 'Z:\RERC- Phones\Server Data\TrimmedData\badsub\';
@@ -15,16 +15,16 @@ else
     WindowSize=3; %Length in s of window around data
 end
 %% Search Directory for Subject Directories and Save the Subject IDs in Array
-filenames= dir('Z:\RERC- Phones\Server Data\TrimmedData\badsub\');%dir(dirname);
+filenames=dir(dirname);
 NotDirectories=cellfun(@(x) x==0, {filenames.isdir});
 filenames(NotDirectories)=[];
 filenames=filenames(cellfun(@(x) strcmp(x(1),'3'), {filenames.name}));
 
 Subjects={filenames.name};
 
-Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
+% Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
 % If fixing badsub, change Activities to bad Activities too
-%Activities={'Stairs Up', 'Stairs Down', 'Walking'};
+Activities={'Sitting', 'Lying', 'Standing'};
 
 % Sensors={'Bar'};
 % Fss=6;
@@ -55,7 +55,7 @@ for indSens=1:length(Sensors)
             SensorRaw=[];
 
             for i=1:length(filenames)
-                SensorData=readtable([dirname Subject '\' Activity '\' Sensor '\' filenames(i).name]);
+                SensorData=readtable([dirname Subject '\' Activity '\' Sensor '\' filenames(i).name],'ReadVariableNames',false);
                 SensorData=cell2mat(table2cell(SensorData));
 
                 if ~any(SensorData)
@@ -83,7 +83,7 @@ for indSens=1:length(Sensors)
                 if strcmp(Sensor,'Bar')
                     SensorData=spline((SensorData(:,1).')./1000,SensorData(:,2).',t);
                 else
-                    SensorData=spline((SensorData(:,1).')./1000,SensorData(:,2:end-1).',t);
+                    SensorData=spline((SensorData(:,1).')./1000,SensorData(:,2:end).',t);
                 end
                 SensorData=SensorData.';
 

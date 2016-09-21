@@ -14,10 +14,10 @@ Set={'Train','Test','Home'};
 for indSet=1:length(Set)
     
     dirname=['Z:\RERC- Phones\Stroke\FinishedData\' Set{indSet} '\'];
-    savedirname=['Z:\RERC- Phones\Stroke\Clips\' Set{indSet} '\'];
+    savedirname=['Z:\RERC- Phones\Stroke\Clips\' Set{indSet}];
 
-    clipDur=5; % Clip length in s
-    clipOverlap=.5; % Percent overlap of clips
+    clipDur=10; % Clip length in s
+    clipOverlap=.9; % Percent overlap of clips
 
     Subjects=1:30;
 
@@ -95,7 +95,7 @@ for indSet=1:length(Set)
                 % Store clips along z dimension of clipData
                 for i=1:numClips
                     startInd=(i-1)*(clipLength-overlapLength);
-                    clipData(:,:,i)=SensorData(startInd+1:startInd+clipLength,:);
+                    clipData(:,:,i)=SensorData(startInd+1:startInd+clipLength,2:end);
 
                     if ~strcmp(Sensors(indSens),'Bar')
                         [featV, ~]=getFeatures(clipData(:,:,i).');
@@ -110,37 +110,37 @@ for indSet=1:length(Set)
                 end
                 % Stores Clip Data with other data from the same sensor and
                 % subject
-                if indSens==1
-                    [~,~,sz]=size(AccData);
-                    if sz==1
-                        sz=0;
-                    end
-                    AccData(:,:,sz+1:sz+numClips)=clipData;
-                elseif indSens==2
-                    [~,~,sz]=size(GyrData);
-                    if sz==1
-                        sz=0;
-                    end
-                    GyrData(:,:,sz+1:sz+numClips)=clipData;
-                elseif indSens==3
-                    [~,~,sz]=size(BarData);
-                    if sz==1
-                        sz=0;
-                    end
-                    BarData(:,:,sz+1:sz+numClips)=clipData;
-                end
+%                 if indSens==1
+%                     [~,~,sz]=size(AccData);
+%                     if sz==1
+%                         sz=0;
+%                     end
+%                     AccData(:,:,sz+1:sz+numClips)=clipData;
+%                 elseif indSens==2
+%                     [~,~,sz]=size(GyrData);
+%                     if sz==1
+%                         sz=0;
+%                     end
+%                     GyrData(:,:,sz+1:sz+numClips)=clipData;
+%                 elseif indSens==3
+%                     [~,~,sz]=size(BarData);
+%                     if sz==1
+%                         sz=0;
+%                     end
+%                     BarData(:,:,sz+1:sz+numClips)=clipData;
+%                 end
             end
             SubjFeat=[SubjFeat; feat];
         end
-
-        SubjClips=struct('SubjID', Subject,  'ActivityLabel', {Label}, 'Acc', AccData, ...
-            'Gyr', GyrData, 'Bar', BarData, 'SamplingT', 20, 'ClipDur', clipDur, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);
+% 
+%         SubjClips=struct('SubjID', Subject,  'ActivityLabel', {Label}, 'Acc', AccData, ...
+%             'Gyr', GyrData, 'Bar', BarData, 'SamplingT', 20, 'ClipDur', clipDur, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);
         SubjFeatures=struct('SubjID', Subject,  'ActivityLabel', {Label}, 'Features', SubjFeat, ...
             'SamplingT', 20, 'ClipDur', clipDur, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);    
 
-        AllClips(indSub)=SubjClips;
+%         AllClips(indSub)=SubjClips;
         AllFeat(indSub)=SubjFeatures;
     end
-    save([savedirname '_Clips.mat'],'AllClips', '-v7.3')
+%     save([savedirname '_Clips.mat'],'AllClips', '-v7.3')
     save([savedirname '_Feat.mat'],'AllFeat', '-v7.3')
 end

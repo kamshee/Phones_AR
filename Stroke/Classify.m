@@ -1,5 +1,7 @@
 %% Train classifier based on MC10 data from Phone Labels
 % Run after GenerateClips.m
+clear all
+
 Subj_CrossVal=1;
 
 ntrees=200;
@@ -57,30 +59,71 @@ for indFold=1:length(Home)
     t = templateTree('MinLeafSize',5);
     RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
     LabelsRF = predict(RFModel,TestFeat);
-    ConfMat{indFold}=confusionmat(TestLabel, LabelsRF);
+    ConfMat{indFold}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF]);
     
-    % Find missing classes and replace them
-    u=unique([TestLabel; LabelsRF]);
-    n_missing=zeros(1,6);
-    for uind=1:length(u)
-        n_missing(strcmp(u(uind),Activities))=1;
+    LabConfMat{indFold}=ConfMat;
+    
+    for i=1:length(Home)
+        if i==indFold; continue; end;
+        Feat=[Feat; Home(i).Features];
+        Label=[Label Home(i).ActivityLabel];
     end
-    z_inds=find(~n_missing);
-    for m=z_inds
-        if m==1
-            ConfMat{indFold}=[zeros(1,size(ConfMat{indFold},2)); ConfMat{indFold}(m:end,:)];
-            ConfMat{indFold}=[zeros(size(ConfMat{indFold},1),1) ConfMat{indFold}(:,m:end)];
-        else
-            ConfMat{indFold}=[ConfMat{indFold}(1:m-1,:); zeros(1,size(ConfMat{indFold},2)); ConfMat{indFold}(m:end,:)];
-            ConfMat{indFold}=[ConfMat{indFold}(:,1:m-1) zeros(size(ConfMat{indFold},1),1) ConfMat{indFold}(:,m:end)];
-        end
-    end
+    
+    TrainFeat=Feat;
+    TrainLabel=Label.';
+    
+    t = templateTree('MinLeafSize',5);
+    RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
+    LabelsRF = predict(RFModel,TestFeat);
+    ConfMat{indFold}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF]);
+    
+    % reorder rows and columns if out of order
+    % classes are put in order of appearence 
+    
+%     for Aind=1:6
+%         L(Aind)=any(strcmp(Activities{Aind},unique(TestLabel)));
+%         P(Aind)=any(strcmp(Activities{Aind},unique(LabelsRF)));
+%     end
+%     
+%     P=find(P & ~L); L=find(L); 
+%   
+%     swaps=0;
+%     for i=1:length(P)
+%         for j=1:length(L)
+%             if P(i)<L(j)
+%                 ConfMat{indFold}=ConfMat{indFold}([1:j-1+swaps i+length(L) j+swaps:length(L)+swaps i+length(L)+1:length(P)+length(L)],[1:j-1+swaps i+length(L) j+swaps:length(L)+swaps i+length(L)+1:length(P)+length(L)]);
+%                 swaps=swaps+1;
+%                 break
+%             end
+%         end
+%     end
+%     
+%     % Find missing classes and replace them
+%     u=unique([TestLabel; LabelsRF]);
+%     n_missing=zeros(1,6);
+%     for uind=1:length(u)
+%         n_missing(strcmp(u(uind),Activities))=1;
+%     end
+%     z_inds=find(~n_missing);
+%     for m=z_inds
+%         if m==1
+%             ConfMat{indFold}=[zeros(1,size(ConfMat{indFold},2)); ConfMat{indFold}(m:end,:)];
+%             ConfMat{indFold}=[zeros(size(ConfMat{indFold},1),1) ConfMat{indFold}(:,m:end)];
+%         else
+%             ConfMat{indFold}=[ConfMat{indFold}(1:m-1,:); zeros(1,size(ConfMat{indFold},2)); ConfMat{indFold}(m:end,:)];
+%             ConfMat{indFold}=[ConfMat{indFold}(:,1:m-1) zeros(size(ConfMat{indFold},1),1) ConfMat{indFold}(:,m:end)];
+%         end
+%     end
+    
+    LabHomeConfMat{indFold}=ConfMat{indFold};
     
 end
 
+save('ConfusionMat_strokestrokeHome.mat','LabConfMat', 'LabHomeConfMat')
+save('ConfusionMat_strokestrokeHome.mat','LabConfMat', 'LabHomeConfMat')
 
 for i=1:size(ConfMat,3)
-    ConfMatAll(:,:,i)=ConfMat{i};
+    ConfMatAll(:,:,i)=LabConfMat{i};
 end
 ConfMatAll=sum(ConfMatAll,3);
 
@@ -93,4 +136,4 @@ set(gca,'XTick',[1 2 3 4 5 6])
 set(gca,'YTick',[1 2 3 4 5 6])
 
 savefig('ConfusionMat_strokestrokeHome')
-save('ConfusionMat_strokestrokeHome.mat',ConfMatAll)
+savefig('ConfusionMat_strokestrokeHome')

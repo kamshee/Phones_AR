@@ -16,7 +16,7 @@ Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking
 % Activities={'Sitting', 'Lying', 'Standing', 'Walking'};
 numAct=length(Activities);
 
-load('Z:\RERC- Phones\Server Data\Clips\PhoneData_Feat.mat')
+load('Z:\RERC- Phones\Server Data\Clips\10s\PhoneData_Feat.mat')
 
 Features=[];
 Labels={};
@@ -88,7 +88,7 @@ TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
 k=length(TPInd);
 Acc=sum(TPInd)/k;
 
-ConfMat=confusionmat(LabelTest, LabelsRF);
+ConfMat=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
 PredLabels=LabelsRF;
 
 correctones = sum(ConfMat,2);
@@ -98,7 +98,7 @@ set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
 
 savefig('ConfusionMat_strokeAll')
-save('ConfusionMat_strokeAll.mat',ConfMat)
+save('ConfusionMat_strokeAll.mat','ConfMat')
 
 
 % Healthy --> Stroke Home
@@ -113,7 +113,7 @@ TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
 k=length(TPInd);
 Acc=sum(TPInd)/k;
 
-ConfMat=confusionmat(LabelTest, LabelsRF);
+ConfMat=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
 PredLabels=LabelsRF;
 
 correctones = sum(ConfMat,2);
@@ -123,7 +123,7 @@ set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
 
 savefig('ConfusionMat_strokeHome')
-save('ConfusionMat_strokeHome.mat',ConfMat)
+save('ConfusionMat_strokeHome.mat','ConfMat')
 
 %% Calculations to evaluate models
 % for i=1:length(AllFeat) 
