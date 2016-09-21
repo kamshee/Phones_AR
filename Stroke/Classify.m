@@ -119,9 +119,11 @@ for indFold=1:length(Home)
     
 end
 
+save('ConfusionMat_strokestrokeHome.mat','LabConfMat', 'LabHomeConfMat')
+save('ConfusionMat_strokestrokeHome.mat','LabConfMat', 'LabHomeConfMat')
 
 for i=1:size(ConfMat,3)
-    ConfMatAll(:,:,i)=ConfMat{i};
+    ConfMatAll(:,:,i)=LabConfMat{i};
 end
 ConfMatAll=sum(ConfMatAll,3);
 
@@ -134,4 +136,4 @@ set(gca,'XTick',[1 2 3 4 5 6])
 set(gca,'YTick',[1 2 3 4 5 6])
 
 savefig('ConfusionMat_strokestrokeHome')
-save('ConfusionMat_strokestrokeHome.mat','LabConfMat', 'LabHomeConfMat')
+savefig('ConfusionMat_strokestrokeHome')

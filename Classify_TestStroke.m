@@ -88,7 +88,7 @@ TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
 k=length(TPInd);
 Acc=sum(TPInd)/k;
 
-ConfMat=confusionmat(LabelTest, LabelsRF);
+ConfMat=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
 PredLabels=LabelsRF;
 
 correctones = sum(ConfMat,2);
@@ -113,7 +113,7 @@ TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
 k=length(TPInd);
 Acc=sum(TPInd)/k;
 
-ConfMat=confusionmat(LabelTest, LabelsRF);
+ConfMat=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
 PredLabels=LabelsRF;
 
 correctones = sum(ConfMat,2);

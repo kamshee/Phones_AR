@@ -5,7 +5,7 @@
 clear all
 close all
 
-flag_badsub=0;
+flag_badsub=1;
 
 if flag_badsub
     dirname = 'Z:\RERC- Phones\Server Data\TrimmedData\badsub\';
@@ -15,7 +15,7 @@ else
     WindowSize=3; %Length in s of window around data
 end
 %% Search Directory for Subject Directories and Save the Subject IDs in Array
-filenames= dir('Z:\RERC- Phones\Server Data\TrimmedData\badsub\');%dir(dirname);
+filenames=dir(dirname);
 NotDirectories=cellfun(@(x) x==0, {filenames.isdir});
 filenames(NotDirectories)=[];
 filenames=filenames(cellfun(@(x) strcmp(x(1),'3'), {filenames.name}));

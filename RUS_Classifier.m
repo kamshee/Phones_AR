@@ -66,7 +66,7 @@ for indSubj=1:length(AllFeat)
     k(indSubj)=length(TPInd);
     Acc(indSubj)=sum(TPInd)/k(indSubj);
 
-    ConfMat{indSubj}=confusionmat(LabelTest, LabelsRF);
+    ConfMat{indSubj}=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
     PredLabels{indSubj}=LabelsRF;
 
     % Find missing classes and replace them
