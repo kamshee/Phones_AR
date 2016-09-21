@@ -38,8 +38,8 @@ end
 
 % SEDENTARY ACTIVITIES
 if strcmp(Activity,'Lying') || strcmp(Activity,'Sitting') || strcmp(Activity,'Standing')
-    cutOffShort=4;
-    cutOffLong=20;
+    cutOffShort=5;
+    cutOffLong=10;
     
     r=.6;
 
@@ -52,11 +52,12 @@ if strcmp(Activity,'Lying') || strcmp(Activity,'Sitting') || strcmp(Activity,'St
         end
     end
     s=nanmean(S,2);  % average entropy across three axes (not using nanmean b/c NaNs from any accel is important)
-
+    As=nanmedian(s)+0.1;
+    
     [val,X]=findpeaks(s);
     X(val<0.5)=[];  % remove indices with peaks < 0.5
 
-    X=find(s>.25);
+    X=find(s>0.15);%find(s>As);
 
     if isempty(X) || length(X)<2
         newAccData=AccData; %csvwrite([dirname 'TrimmedData\' Set{indSet} '\Acc\' filenames(indFile).name],AccData)
@@ -84,7 +85,7 @@ if strcmp(Activity,'Lying') || strcmp(Activity,'Sitting') || strcmp(Activity,'St
         StartInd=find(diff(bursts)==-1,1,'last')+1;
         Start=X(StartInd)+cutOff;
         if isempty(Start)
-            Start=1;
+            Start=1+cutOff;
             %newAccData=AccData; %csvwrite([dirname 'TrimmedData\' Set{indSet} '\Acc\' filenames(indFile).name],AccData)
             %newGyrData=GyrData; %csvwrite([dirname 'TrimmedData\' Set{indSet} '\Gyr\' filenames(indFile).name],GyrData)
             %newBarData=BarData; %csvwrite([dirname 'TrimmedData\' Set{indSet} '\Bar\' filenames(indFile).name],BarData)
@@ -94,7 +95,7 @@ if strcmp(Activity,'Lying') || strcmp(Activity,'Sitting') || strcmp(Activity,'St
         EndInd=find(diff(bursts)==1,1,'last')+1;
         End=X(EndInd)-cutOff;
         if isempty(End)
-            End=X(end)-10;
+            End=X(end)-cutOff;
         end      
     end
     
