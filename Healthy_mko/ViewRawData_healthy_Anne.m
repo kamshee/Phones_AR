@@ -13,7 +13,7 @@ clear all
 
 tic
 
-saveTrim=1;
+saveTrim=0;
 saveOrient=0;
 
 dirmain='Z:\RERC- Phones\Server Data\';
@@ -37,7 +37,7 @@ Activities={'Standing'};
 %Labels=table2cell(readtable('Z:\RERC- Phones\Stroke\Labels_stroke.csv','ReadVariableNames',false));
 
 % Manual trim fixes
-trimFixIndAll=readtable('trimfixes.csv');
+trimFixIndAll=readtable('trimfixes_goodsubj.csv');
 
 
 
