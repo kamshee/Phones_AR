@@ -13,7 +13,7 @@ clear all
 
 tic
 
-saveTrim=0;
+saveTrim=1;
 saveOrient=0;
 
 dirmain='Z:\RERC- Phones\Server Data\';
@@ -31,7 +31,7 @@ end
 Set={'Sensor_Data_V2'};
 
 %Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'}; %(skip sit-to-stand stand-to-sit, Wheeling)
-Activities={'Standing'};
+Activities={'Walking'};
 
 %load('Z:\Stroke MC10\Sessions.mat')
 %Labels=table2cell(readtable('Z:\RERC- Phones\Stroke\Labels_stroke.csv','ReadVariableNames',false));
@@ -68,7 +68,7 @@ for indSet=1:length(Set)
     AllRates=[];
 
     badsub=unique(trimFixIndAll.Subject);
-    for indBadSub=1:length(badsub)%[1:sy]
+    for indBadSub=12%1:length(badsub)%[1:sy]
         indSub=badsub(indBadSub);
         
         filenames=AllFilenames;
