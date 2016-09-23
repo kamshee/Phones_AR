@@ -24,7 +24,7 @@ Subjects={filenames.name};
 
 % Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
 % If fixing badsub, change Activities to bad Activities too
-Activities={'Sitting', 'Lying', 'Standing'};
+Activities={'Standing'};
 
 % Sensors={'Bar'};
 % Fss=6;
@@ -36,7 +36,7 @@ for indSens=1:length(Sensors)
     Sensor=Sensors{indSens};
     Fs=Fss(indSens);
     WindowSamples=WindowSize*Fs;
-    parfor indSub=1:length(Subjects)
+    for indSub=1:8%length(Subjects)
         Subject=Subjects{indSub};
         for indAct=1:length(Activities)
             Activity=Activities{indAct};

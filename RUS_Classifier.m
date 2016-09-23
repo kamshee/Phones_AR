@@ -87,6 +87,8 @@ for indSubj=1:length(AllFeat)
     end
 
 end
+
+save RUSConfusion.mat ConfMat
 %% Calculations to evaluate models
 for i=1:size(ConfMat,3)
     ConfMatAll(:,:,i)=ConfMat{i};
@@ -111,4 +113,3 @@ set(gca,'YTickLabels',Activities)
 
 
 WAcc=sum(diag(ConfMatAll))/sum(sum(ConfMatAll));
-save RUSConfusion.mat ConfMatAll

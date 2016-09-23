@@ -91,6 +91,8 @@ Acc=sum(TPInd)/k;
 ConfMat=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
 PredLabels=LabelsRF;
 
+save('ConfusionMat_strokeAll.mat','ConfMat')
+
 correctones = sum(ConfMat,2);
 correctones = repmat(correctones,[1 6]);
 figure; imagesc(ConfMat./correctones); colorbar
@@ -98,8 +100,6 @@ set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
 
 savefig('ConfusionMat_strokeAll')
-save('ConfusionMat_strokeAll.mat','ConfMat')
-
 
 % Healthy --> Stroke Home
 FeatTest=TestFeatures(indHomeStart+1:end,2:end);
@@ -116,6 +116,8 @@ Acc=sum(TPInd)/k;
 ConfMat=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
 PredLabels=LabelsRF;
 
+save('ConfusionMat_strokeHome.mat','ConfMat')
+
 correctones = sum(ConfMat,2);
 correctones = repmat(correctones,[1 6]);
 figure; imagesc(ConfMat./correctones); colorbar
@@ -123,7 +125,6 @@ set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
 
 savefig('ConfusionMat_strokeHome')
-save('ConfusionMat_strokeHome.mat','ConfMat')
 
 %% Calculations to evaluate models
 % for i=1:length(AllFeat) 
