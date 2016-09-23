@@ -34,7 +34,6 @@ Subjs=[];
 HomeInds=[];
 
 for i=1:length(Train)
-    if i==indFold; continue; end;
     Feat=[Feat; Train(i).Features];
     Label=[Label Train(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Train(i).ActivitiyLabel)])];
@@ -42,7 +41,6 @@ for i=1:length(Train)
 end
 
 for i=1:length(Test)
-    if i==indFold; continue; end;
     Feat=[Feat; Test(i).Features];
     Label=[Label Test(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Train(i).ActivitiyLabel)])];
@@ -94,8 +92,8 @@ for indFold=1:length(Home)
     TestLabelLab=Label(~HomeInds & Subjs==indFold,:);     
     TestLabelLab=TestLabelLab.';
     
-    LabelsRF = predict(RFModel,TestFeat);
-    LabConfMatLab{indFold}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
+    LabelsRF = predict(RFModel,TestFeatLab);
+    LabConfMatLab{indFold}=confusionmat([Activities'; TestLabelLab], [Activities'; LabelsRF])-eye(6);
     
     %% Resample and test Lab+Home->Home
     
@@ -115,8 +113,8 @@ for indFold=1:length(Home)
         LabelsRF = predict(RFModel,TestFeat);
         LabHomeConfMatHome{indFold,indResample}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
         
-        LabelsRF = predict(RFModel,TestFeat);
-        LabHomeConfMatLab{indFold,indResample}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
+        LabelsRF = predict(RFModel,TestFeatLab);
+        LabHomeConfMatLab{indFold,indResample}=confusionmat([Activities'; TestLabelLab], [Activities'; LabelsRF])-eye(6);
         
     end
 end
