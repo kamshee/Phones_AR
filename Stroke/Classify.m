@@ -36,31 +36,31 @@ HomeInds=[];
 for i=1:length(Train)
     Feat=[Feat; Train(i).Features];
     Label=[Label Train(i).ActivityLabel];
-    Subjs=[Subjs repmat(i,[1 length(Train(i).ActivitiyLabel)])];
+    Subjs=[Subjs repmat(i,[1 length(Train(i).ActivityLabel)])];
     HomeInds=[HomeInds zeros(1,length(Train(i).ActivityLabel))];
 end
 
 for i=1:length(Test)
     Feat=[Feat; Test(i).Features];
     Label=[Label Test(i).ActivityLabel];
-    Subjs=[Subjs repmat(i,[1 length(Train(i).ActivitiyLabel)])];
-    HomeInds=[HomeInds zeros(1,length(Train(i).ActivityLabel))];
+    Subjs=[Subjs repmat(i,[1 length(Test(i).ActivityLabel)])];
+    HomeInds=[HomeInds zeros(1,length(Test(i).ActivityLabel))];
 end
 
 for i=1:length(Home)
     Feat=[Feat; Home(i).Features];
     Label=[Label Home(i).ActivityLabel];
-    Subjs=[Subjs repmat(i,[1 length(Train(i).ActivitiyLabel)])];
-    HomeInds=[HomeInds zeros(1,length(Train(i).ActivityLabel))];
+    Subjs=[Subjs repmat(i,[1 length(Home(i).ActivityLabel)])];
+    HomeInds=[HomeInds ones(1,length(Home(i).ActivityLabel))];
 end
 
 for indFold=1:length(Home)
     
-    TrainFeat=Feat(~HomeInds & ~Subjs==indFold,:);
-    TrainLabel=Label(~HomeInds & ~Subjs==indFold,:).';
+    TrainFeat=Feat(~HomeInds & Subjs~=indFold,:);
+    TrainLabel=Label(~HomeInds & Subjs~=indFold).';
 
     TestFeat=Feat(Subjs==indFold,:);
-    TestLabel=Label(Subjs==indFold,:);     
+    TestLabel=Label(Subjs==indFold);     
     TestLabel=TestLabel.';
 
     t = templateTree('MinLeafSize',5);
@@ -76,11 +76,14 @@ for indFold=1:length(Home)
     
     Subjs_w_Home=cellfun(@(x) ~isempty(x),{Home.Features});
     
-    TrainFeat=Feat(~HomeInds & ~Subjs==indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2),:);
-    TrainLabel=Label(~HomeInds & ~Subjs==indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2),:).';
+    TrainFeat=Feat(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2),:);
+    TrainLabel=Label(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2)).';
+    TempSubjs=Subjs(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2));
+    
+    trainsizes=sum(bsxfun(@eq,find(Subjs_w_Home),TempSubjs'),1);
 
     TestFeat=Feat(HomeInds & Subjs==indFold,:);
-    TestLabel=Label(HomeInds & Subjs==indFold,:);     
+    TestLabel=Label(HomeInds & Subjs==indFold);     
     TestLabel=TestLabel.';
 
     t = templateTree('MinLeafSize',5);
@@ -89,7 +92,7 @@ for indFold=1:length(Home)
     LabConfMatHome{indFold}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
     
     TestFeatLab=Feat(~HomeInds & Subjs==indFold,:);
-    TestLabelLab=Label(~HomeInds & Subjs==indFold,:);     
+    TestLabelLab=Label(~HomeInds & Subjs==indFold);     
     TestLabelLab=TestLabelLab.';
     
     LabelsRF = predict(RFModel,TestFeatLab);
@@ -97,16 +100,18 @@ for indFold=1:length(Home)
     
     %% Resample and test Lab+Home->Home
     
-    trainsize=size(TrainFeat,1);
-    
     for indResample=1:10
     
-        TrainFeat=Feat(~Subjs==indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2),:);
-        TrainLabel=Label(~Subjs==indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2),:).';
-        
-        resampinds=randperm(size(TrainFeat,1),trainsize);
-        TrainFeat=TrainFeat(resampinds,:);
-        TrainLabel=TrainLabel(resampinds);
+        for i=1:length(trainsizes)
+            TempFeat=Feat(Subjs==Subj_w_Home(i),:);
+            TempLabel=Label(Subjs==Subj_w_Home(i));
+            
+            resampinds=randperm(size(TempFeat,1),trainsize);
+            TempFeat=TempFeat(resampinds,:);
+            TempLabel=TempLabel(resampinds);
+            TrainFeat=[TrainFeat; TempFeat];
+            TrainLabel=[TrainLabel; TempLabel'];
+        end
 
         t = templateTree('MinLeafSize',5);
         RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
@@ -121,10 +126,10 @@ end
 
 save('ConfusionMat_strokestrokeHome.mat','LabConfMatHome', 'LabHomeConfMatHome', 'PopConfMat', 'LabConfMatLab', 'LabHomeConfMatLab')
 
-ConfMatAll=zeros(length(Activities),length(Activities),length(LabConfMat));
+ConfMatAll=zeros(length(Activities),length(Activities),length(LabConfMatHome));
 
-for i=length(LabConfMat):-1:1
-    ConfMatAll(:,:,i)=LabConfMat{i};
+for i=length(LabConfMatHome):-1:1
+    ConfMatAll(:,:,i)=LabConfMatHome{i};
 end
 ConfMatAll=sum(ConfMatAll,3);
 
@@ -138,10 +143,10 @@ set(gca,'YTick',[1 2 3 4 5 6])
 
 savefig('ConfusionMat_strokestrokeLab')
 
-ConfMatAll=zeros(length(Activities),length(Activities),length(LabHomeConfMat));
+ConfMatAll=zeros(length(Activities),length(Activities),length(LabHomeConfMatHome));
 
-for i=length(LabHomeConfMat):-1:1
-    ConfMatAll(:,:,i)=LabHomeConfMat{i};
+for i=length(LabHomeConfMatHome):-1:1
+    ConfMatAll(:,:,i)=LabHomeConfMatHome{i};
 end
 ConfMatAll=sum(ConfMatAll,3);
 
