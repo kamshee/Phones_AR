@@ -1,0 +1,166 @@
+Subject,Activity,Trial,Start,End
+1,Stairs Up,11,10,23
+1,Stairs Up,10,17,133
+1,Stairs Up,9,6,17
+1,Stairs Up,8,6,18
+1,Stairs Up,7,6,17
+1,Stairs Up,5,10,21
+1,Stairs Up,3,9,47
+1,Stairs Up,2,12,25
+2,Stairs Up,21,3,11
+2,Stairs Up,17,6,21
+2,Stairs Up,13,7,22
+2,Stairs Up,6,7,19
+2,Stairs Up,5,5,15
+4,Stairs Up,20,6,21
+4,Stairs Up,16,2,17
+4,Stairs Up,15,2,8
+4,Stairs Up,13,3,33
+4,Stairs Up,11,8,25
+4,Stairs Up,7,2,11
+4,Stairs Up,6,7,23
+4,Stairs Up,2,3,12
+5,Stairs Up,15,3,39
+5,Stairs Up,14,6,43
+5,Stairs Up,12,4,30
+5,Stairs Up,11,4,42
+5,Stairs Up,10,1,33
+5,Stairs Up,7,1,36
+6,Stairs Up,2,6,17
+7,Stairs Up,29,20,65
+7,Stairs Up,28,18,73
+7,Stairs Up,27,17,64
+7,Stairs Up,26,18,64
+7,Stairs Up,25,15,66
+7,Stairs Up,24,15,67
+7,Stairs Up,23,15,59
+7,Stairs Up,22,20,77
+7,Stairs Up,21,11,65
+7,Stairs Up,20,10,58
+7,Stairs Up,19,15,62
+7,Stairs Up,18,12,51
+7,Stairs Up,17,12,59
+7,Stairs Up,16,31,70
+7,Stairs Up,14,19,69
+7,Stairs Up,13,26,81
+7,Stairs Up,12,15,63
+7,Stairs Up,11,13,74
+7,Stairs Up,8,12,67
+7,Stairs Up,7,13,64
+7,Stairs Up,6,18,56
+7,Stairs Up,4,17,76
+7,Stairs Up,3,15,72
+8,Stairs Up,6,2,12
+8,Stairs Up,4,8,13
+8,Stairs Up,2,3,9
+11,Stairs Up,6,2,8
+11,Stairs Up,5,2,7
+11,Stairs Up,4,1,7
+11,Stairs Up,3,2,7
+11,Stairs Up,2,2,8
+11,Stairs Up,1,8,13
+12,Stairs Up,,,
+13,Stairs Up,4,8,21
+13,Stairs Up,1,22,103
+14,Stairs Up,17,2,8
+14,Stairs Up,16,1,9
+14,Stairs Up,14,7,13
+14,Stairs Up,13,1,8
+14,Stairs Up,10,7,17
+14,Stairs Up,8,3,8
+14,Stairs Up,7,5,10
+14,Stairs Up,6,3,11
+14,Stairs Up,5,6,14
+14,Stairs Up,4,7,24
+14,Stairs Up,3,6,21
+14,Stairs Up,1,6,17
+15,Stairs Up,5,1,7
+15,Stairs Up,4,1,7
+1,Walking,16,353,881
+1,Walking,15,23,200
+1,Walking,14,828,1188
+1,Walking,12,1286,1666
+1,Walking,11,75,532
+1,Walking,9,8,54
+1,Walking,7,992,1804
+1,Walking,6,934,2100
+1,Walking,4,1152,1891
+1,Walking,3,84,606
+1,Walking,2,9,112
+1,Walking,1,90,967
+2,Walking,18,8,46
+2,Walking,15,6,15
+2,Walking,14,8,34
+2,Walking,13,10,77
+2,Walking,2,23,390
+2,Walking,1,90,879
+4,Walking,40,38,57
+4,Walking,37,8,25
+4,Walking,33,7,17
+4,Walking,28,3,9
+4,Walking,23,6,14
+4,Walking,22,86,174
+4,Walking,20,22,31
+4,Walking,17,10,41
+4,Walking,15,12,38
+4,Walking,9,14,52
+4,Walking,7,9,25
+4,Walking,6,36,61
+4,Walking,5,3,32
+4,Walking,4,12,39
+4,Walking,1,20,132
+5,Walking,19,91,226
+5,Walking,17,10,341
+5,Walking,16,13,272
+5,Walking,14,5,67
+5,Walking,13,27,589
+5,Walking,11,48,259
+5,Walking,6,14,154
+6,Walking,9,2,21
+6,Walking,8,87,473
+6,Walking,6,5,24
+6,Walking,5,29,81
+6,Walking,3,2,45
+6,Walking,2,56,80
+6,Walking,1,23,43
+7,Walking,29,24,374
+7,Walking,26,12,210
+7,Walking,21,18,196
+7,Walking,20,10,175
+7,Walking,19,15,318
+7,Walking,18,9,204
+7,Walking,17,13,237
+7,Walking,16,14,200
+7,Walking,13,43,379
+7,Walking,11,20,192
+7,Walking,9,34,303
+7,Walking,8,20,199
+7,Walking,7,13,165
+7,Walking,6,77,199
+7,Walking,5,14,141
+7,Walking,2,14,180
+8,Walking,11,9,347
+8,Walking,10,85,2269
+8,Walking,7,63,1441
+8,Walking,5,20,342
+8,Walking,4,33,44
+8,Walking,3,80,2937
+8,Walking,2,39,143
+8,Walking,1,105,121
+11,Walking,9,2,20
+11,Walking,8,3,18
+11,Walking,6,2,21
+11,Walking,3,3,19
+11,Walking,1,10,49
+12,Walking,5,2,15
+12,Walking,4,2,9
+12,Walking,2,46,203
+12,Walking,1,64,94
+13,Walking,4,61,205
+13,Walking,3,366,777
+13,Walking,2,15,100
+13,Walking,1,4,204
+14,Walking,8,202,216
+14,Walking,6,43,67
+14,Walking,4,3,23
+15,Walking,3,12,29
