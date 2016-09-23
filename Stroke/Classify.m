@@ -113,7 +113,7 @@ for indFold=1:length(Home)
         t = templateTree('MinLeafSize',5);
         RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
         LabelsRF = predict(RFModel,TestFeat);
-        LabHomeConfMat{indFold,indResample}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
+        LabHomeConfMatHome{indFold,indResample}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
         
         LabelsRF = predict(RFModel,TestFeat);
         LabHomeConfMatLab{indFold,indResample}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
@@ -121,8 +121,7 @@ for indFold=1:length(Home)
     end
 end
 
-save('ConfusionMat_strokestrokeHome.mat','LabConfMat', 'LabHomeConfMat')
-save('ConfusionMat_strokestrokeHome.mat','LabConfMat', 'LabHomeConfMat')
+save('ConfusionMat_strokestrokeHome.mat','LabConfMatHome', 'LabHomeConfMatHome', 'PopConfMat', 'LabConfMatLab', 'LabHomeConfMatLab')
 
 ConfMatAll=zeros(length(Activities),length(Activities),length(LabConfMat));
 
