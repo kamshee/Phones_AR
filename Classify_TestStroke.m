@@ -77,6 +77,7 @@ FeatTrain=Features(:,2:end);
 LabelTrain=Labels;
 
 % Healthy --> Stroke all
+SubjectID=TestFeatures(:,1);
 FeatTest=TestFeatures(:,2:end);
 LabelTest=TestLabels;
 
@@ -91,7 +92,7 @@ Acc=sum(TPInd)/k;
 ConfMat=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
 PredLabels=LabelsRF;
 
-save('ConfusionMat_strokeAll.mat','ConfMat')
+save('ConfusionMat_strokeAll.mat','ConfMat','PredLabels','LabelTest','SubjectID')
 
 correctones = sum(ConfMat,2);
 correctones = repmat(correctones,[1 6]);
@@ -102,11 +103,10 @@ set(gca,'YTickLabels',Activities)
 savefig('ConfusionMat_strokeAll')
 
 % Healthy --> Stroke Home
+SubjectID=TestFeatures(indHomeStart+1:end,1);
 FeatTest=TestFeatures(indHomeStart+1:end,2:end);
 LabelTest=TestLabels(indHomeStart+1:end);
 
-t = templateTree('MinLeafSize',5);
-RFModel=fitensemble(FeatTrain,LabelTrain,'RUSBoost',ntrees,t,'LearnRate',0.1);
 LabelsRF = predict(RFModel,FeatTest);
 
 TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
@@ -116,7 +116,7 @@ Acc=sum(TPInd)/k;
 ConfMat=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
 PredLabels=LabelsRF;
 
-save('ConfusionMat_strokeHome.mat','ConfMat')
+save('ConfusionMat_strokeHome.mat','ConfMat','PredLabels','LabelTest','SubjectID')
 
 correctones = sum(ConfMat,2);
 correctones = repmat(correctones,[1 6]);
