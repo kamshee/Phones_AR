@@ -6,13 +6,10 @@ Subs={Subs(:).name};
 Sensors={'Acc', 'Gyr', 'Bar'};
 
 for indSens=1:length(Sensors)
-    filenames=dir([dirname Sensors{indSens} '/']);
+    filenames=dir([dirname Sensors{indSens} '/3*']);
     for indFile=1:length(filenames)
         fileparts=strsplit(filenames(indFile).name,'_');
         Subj=fileparts{1};
-        if ~any(strcmp(Subj,Subs))
-            continue
-        end
         Activity=fileparts{2};
         Index=fileparts{3}(1:end-4);
         

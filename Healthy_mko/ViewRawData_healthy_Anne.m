@@ -13,13 +13,13 @@ clear all
 
 tic
 
-saveTrim=0;
+saveTrim=1;
 saveOrient=0;
 
 dirmain='Z:\RERC- Phones\Server Data\';
 
 % show activity plots of sensor data?
-plotsonRaw=1;
+plotsonRaw=0;
 plotsonClean=0;
 
 plotson=0;
