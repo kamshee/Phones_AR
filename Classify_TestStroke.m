@@ -67,7 +67,7 @@ for indSubj=1:length(AllFeat)
     
     % Vector in first column of TestFeatures indexes subjects
     SubjectV=ones(length(tempTestLabels),1)*indSubj; 
-    TestFeatures(end+1:end+length(tempTestLabels),:)=[SubjectV AllFeat(indSubj).TestFeatures(:,:)];
+    TestFeatures(end+1:end+length(tempTestLabels),:)=[SubjectV AllFeat(indSubj).Features(:,:)];
     TestLabels=[TestLabels tempTestLabels];
 end
 
