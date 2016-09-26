@@ -76,9 +76,9 @@ for indFold=1:length(Home)
     
     Subjs_w_Home=cellfun(@(x) ~isempty(x),{Home.Features});
     
-    TrainFeat=Feat(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2),:);
-    TrainLabel=Label(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2)).';
-    TempSubjs=Subjs(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2));
+    TrainFeat=Feat(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2)',:);
+    TrainLabel=Label(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2)').';
+    TempSubjs=Subjs(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2)');
     
     trainsizes=sum(bsxfun(@eq,find(Subjs_w_Home),TempSubjs'),1);
 
@@ -99,14 +99,17 @@ for indFold=1:length(Home)
     LabConfMatLab{indFold}=confusionmat([Activities'; TestLabelLab], [Activities'; LabelsRF])-eye(6);
     
     %% Resample and test Lab+Home->Home
-    
+    Subjs_w_Home=find(Subjs_w_Home);
     for indResample=1:10
     
+        TrainFeat=[];
+        TrainLabel={};
+        
         for i=1:length(trainsizes)
-            TempFeat=Feat(Subjs==Subj_w_Home(i),:);
-            TempLabel=Label(Subjs==Subj_w_Home(i));
+            TempFeat=Feat(Subjs==Subjs_w_Home(i),:);
+            TempLabel=Label(Subjs==Subjs_w_Home(i));
             
-            resampinds=randperm(size(TempFeat,1),trainsize);
+            resampinds=randperm(size(TempFeat,1),trainsizes(i));
             TempFeat=TempFeat(resampinds,:);
             TempLabel=TempLabel(resampinds);
             TrainFeat=[TrainFeat; TempFeat];
@@ -143,11 +146,18 @@ set(gca,'YTick',[1 2 3 4 5 6])
 
 savefig('ConfusionMat_strokestrokeLab')
 
-ConfMatAll=zeros(length(Activities),length(Activities),length(LabHomeConfMatHome));
+subjinds=cellfun(@(x) ~isempty(x), LabHomeConfMatHome(:,1));
+ConfMatAll=zeros(length(Activities),length(Activities),sum(subjinds),size(LabHomeConfMatHome,2));
 
-for i=length(LabHomeConfMatHome):-1:1
-    ConfMatAll(:,:,i)=LabHomeConfMatHome{i};
+subjinds=find(subjinds);
+
+for i=1:length(subjinds)
+    ind=subjinds(i);
+    for j=1:size(LabHomeConfMatHome,2)
+        ConfMatAll(:,:,ind,j)=LabHomeConfMatHome{ind,j};
+    end
 end
+ConfMatAll=sum(ConfMatAll,4);
 ConfMatAll=sum(ConfMatAll,3);
 
 correctones = sum(ConfMatAll,2);
