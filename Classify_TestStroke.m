@@ -89,14 +89,18 @@ TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
 k=length(TPInd);
 Acc=sum(TPInd)/k;
 
-ConfMat=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
+for indSub=1:length(AllFeat)
+    ConfMat{indSub}=confusionmat([Activities'; LabelTest(SubjectID==indSub)], [Activities'; LabelsRF(SubjectID==indSub)])-eye(6);
+    ConfMatAll(:,:,indSub)=ConfMat{indSub};
+end
+ConfMatAll=sum(ConfMatAll,3);
 PredLabels=LabelsRF;
 
-save('ConfusionMat_strokeAll.mat','ConfMat','PredLabels','LabelTest','SubjectID')
+save('ConfusionMat_strokeAll.mat','ConfMat','ConfMatAll')
 
-correctones = sum(ConfMat,2);
+correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
-figure; imagesc(ConfMat./correctones); colorbar
+figure; imagesc(ConfMatAll./correctones); colorbar
 set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
 
@@ -113,14 +117,18 @@ TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
 k=length(TPInd);
 Acc=sum(TPInd)/k;
 
-ConfMat=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
+for indSub=1:length(AllFeat)
+    ConfMat{indSub}=confusionmat([Activities'; LabelTest(SubjectID==indSub)], [Activities'; LabelsRF(SubjectID==indSub)])-eye(6);
+    ConfMatAll(:,:,indSub)=ConfMat{indSub};
+end
+ConfMatAll=sum(ConfMatAll,3);
 PredLabels=LabelsRF;
 
-save('ConfusionMat_strokeHome.mat','ConfMat','PredLabels','LabelTest','SubjectID')
+save('ConfusionMat_strokeHome.mat','ConfMat','ConfMatAll')
 
-correctones = sum(ConfMat,2);
+correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
-figure; imagesc(ConfMat./correctones); colorbar
+figure; imagesc(ConfMatAll./correctones); colorbar
 set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
 

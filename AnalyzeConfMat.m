@@ -1,6 +1,6 @@
 clc
 clear all
-%close all
+close all
 % -------------------------------------------------------------------------
 % AnalyzeConfMat.m
 
@@ -35,16 +35,15 @@ title('Healthy to Healthy')
 
 for i=1:numAct
     for j=1:numAct
-        text(i-0.25,j,num2str(ConfMat(i,j)));
+        text(i-0.25,j,num2str(ConfMatAll(i,j)));
     end
 end
 
-% % Box plots
-% F1_Healthy=calc_f1(ConfMatAll);
-% 
-% figure;
-% boxplot(F1_Healthy,Activities); 
-% title('Healthy to Healthy');
+% Accuracy
+for indSub=1:length(ConfMat)
+    correctones = sum(ConfMat{indSub},2);
+    Acc_Health(:,indSub)=diag(ConfMat{indSub}./repmat(correctones,[1,numAct]));
+end
 
 %% Healthy to Stroke
 
@@ -65,10 +64,10 @@ for i=1:numAct
 end
 
 % % Box plots
-% F1_Stroke(i,:)=calc_f1(ConfMat);
+% Acc_Stroke=diag(ConfMat./correctones);
 %
 % figure;
-% boxplot(F1_Stroke,Activities); 
+% boxplot(Acc_Stroke,Activities); 
 % title('Healthy to Stroke');
 
 %% Lab vs. Home
