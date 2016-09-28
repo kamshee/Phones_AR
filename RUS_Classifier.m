@@ -7,7 +7,8 @@ ntrees=200;
 rmvFeat=1;
 if rmvFeat
     load NormImp
-    FeatInds=find(norm_imp>.25);
+    %FeatInds=find(norm_imp>.25);
+    FeatInds=find(norm_imp(1:end-8)>.25);
 else
     FeatInds=1:270;
 end
@@ -88,7 +89,7 @@ for indSubj=1:length(AllFeat)
 
 end
 
-save RUSConfusion.mat ConfMat
+save RUSConfusion_noBar.mat ConfMat
 %% Calculations to evaluate models
 for i=1:size(ConfMat,3)
     ConfMatAll(:,:,i)=ConfMat{i};
