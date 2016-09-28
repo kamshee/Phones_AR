@@ -15,61 +15,6 @@ numAct=length(Activities);
 
 %load('Z:\RERC- Phones\Server Data\Clips\10s\PhoneData_Feat.mat') % Features
 
-%% Healthy to Healthy
-
-load('RUSConfusion');
-
-% Confusion Matrix
-for i=1:size(ConfMat,3)
-    ConfMatAll(:,:,i)=ConfMat{i};
-end
-
-ConfMatAll=sum(ConfMatAll,3);
-correctones = sum(ConfMatAll,2);
-correctones = repmat(correctones,[1 6]);
-figure; imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
-set(gca,'XTickLabels',Activities)
-set(gca,'YTickLabels',Activities)
-xlabel('Predicted Activities'); ylabel('True Activities');
-title('Healthy to Healthy')
-
-for i=1:numAct
-    for j=1:numAct
-        text(i-0.25,j,num2str(ConfMatAll(i,j)));
-    end
-end
-
-% Accuracy
-for indSub=1:length(ConfMat)
-    correctones = sum(ConfMat{indSub},2);
-    Acc_Health(:,indSub)=diag(ConfMat{indSub}./repmat(correctones,[1,numAct]));
-end
-
-%% Healthy to Stroke
-
-load('ConfusionMat_strokeHome.mat')
-
-correctones = sum(ConfMat,2);
-correctones = repmat(correctones,[1 6]);
-figure; imagesc(ConfMat./correctones); colorbar
-set(gca,'XTickLabels',Activities)
-set(gca,'YTickLabels',Activities)
-xlabel('Predicted Activities'); ylabel('True Activities');
-title('Healthy to Stroke Home')
-
-for i=1:numAct
-    for j=1:numAct
-        text(i-0.25,j,num2str(ConfMat(i,j)));
-    end
-end
-
-% % Box plots
-% Acc_Stroke=diag(ConfMat./correctones);
-%
-% figure;
-% boxplot(Acc_Stroke,Activities); 
-% title('Healthy to Stroke');
-
 %% Lab vs. Home
 load('ConfusionMat_strokestrokeHome');
 
@@ -99,7 +44,7 @@ set(gca,'YTick',[1 2 3 4 5 6])
 
 for i=1:numAct
     for j=1:numAct
-        text(i-0.25,j,num2str(ConfMatAll(i,j)));
+        text(i-0.25,j,num2str(ConfMatAll(j,i)));
     end
 end
 
@@ -129,36 +74,132 @@ set(gca,'YTick',[1 2 3 4 5 6])
 
 for i=1:numAct
     for j=1:numAct
-        text(i-0.25,j,num2str(ConfMatAll(i,j)));
+        text(i-0.25,j,num2str(ConfMatAll(j,i)));
     end
 end
 
-% Box plots
+% Accuracy
 for i=1:length(subjinds)
     indSub=subjinds(i);
-    F1_LabLab(i,:)=calc_f1(LabConfMatLab{1,indSub});
-    F1_LabHome(i,:)=calc_f1(LabConfMatHome{1,indSub});
+    
+    Acc_LabLab(i,:)=calc_classacc(LabConfMatLab{indSub});
+    Acc_LabHome(i,:)=calc_classacc(LabConfMatHome{indSub});
     
     LabHomeConfMatLab_sub=cat(3,LabHomeConfMatLab{indSub,:});
     LabHomeConfMatHome_sub=cat(3,LabHomeConfMatHome{indSub,:});
-    F1_LabHomeLab(i,:)=calc_f1(sum(LabHomeConfMatLab_sub,3));
-    F1_LabHomeHome(i,:)=calc_f1(sum(LabHomeConfMatHome_sub,3));
+    Acc_LabHomeLab(i,:)=calc_classacc(sum(LabHomeConfMatLab_sub,3));
+    Acc_LabHomeHome(i,:)=calc_classacc(sum(LabHomeConfMatHome_sub,3));
 
 end
 
+% Box plots: Environment-specific
 figure;
-boxplot(F1_LabLab,Activities); 
+subplot(2,2,1);
+boxplot(Acc_LabLab,Activities);
+boxplot_fill('y')
+ylim([0 1.1]);
 title('Stroke Lab to Stroke Lab');
 
-figure;
-boxplot(F1_LabHome,Activities); 
+subplot(2,2,2);
+boxplot(Acc_LabHome,Activities);
+boxplot_fill([1 0.5 0])
+ylim([0 1.1]);
 title('Stroke Lab to Stroke Home');
 
-figure;
-boxplot(F1_LabHomeLab,Activities); 
+subplot(2,2,3);
+boxplot(Acc_LabHomeLab,Activities);
+boxplot_fill([1 0.5 0])
+ylim([0 1.1]);
 title('Stroke Lab+Home to Stroke Lab');
 
-figure;
-boxplot(F1_LabHomeHome,Activities); 
+subplot(2,2,4);
+boxplot(Acc_LabHomeHome,Activities);
+boxplot_fill('r')
+ylim([0 1.1]);
 title('Stroke Lab+Home to Stroke Home');
 
+%% Healthy to Healthy
+
+load('RUSConfusion');
+
+% Confusion Matrix
+for i=1:size(ConfMat,2)
+    ConfMatAll(:,:,i)=ConfMat{i};
+end
+
+ConfMatAll=sum(ConfMatAll,3);
+correctones = sum(ConfMatAll,2);
+correctones = repmat(correctones,[1 6]);
+figure; imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
+set(gca,'XTickLabels',Activities)
+set(gca,'YTickLabels',Activities)
+xlabel('Predicted Activities'); ylabel('True Activities');
+title('Healthy to Healthy')
+
+for i=1:numAct
+    for j=1:numAct
+        text(i-0.25,j,num2str(ConfMatAll(j,i)));
+    end
+end
+
+% Accuracy
+for indSub=1:length(ConfMat)
+    Acc_Health(indSub,:)=calc_classacc(ConfMat{indSub});
+end
+
+%% Healthy to Stroke Home
+
+load('ConfusionMat_strokeHome.mat')
+
+% Confusion Matrix
+for i=1:size(ConfMat,2)
+    ConfMatAll(:,:,i)=ConfMat{i};
+end
+
+ConfMatAll=sum(ConfMatAll,3);
+correctones = sum(ConfMatAll,2);
+correctones = repmat(correctones,[1 6]);
+figure; imagesc(ConfMatAll./correctones); colorbar
+set(gca,'XTickLabels',Activities)
+set(gca,'YTickLabels',Activities)
+xlabel('Predicted Activities'); ylabel('True Activities');
+title('Healthy to Stroke Home')
+
+for i=1:numAct
+    for j=1:numAct
+        text(i-0.25,j,num2str(ConfMatAll(j,i)));
+    end
+end
+
+% Accuracy
+for i=1:length(subjinds)
+    indSub=subjinds(i);
+    Acc_Stroke(i,:)=calc_classacc(ConfMat{indSub});
+end
+
+% Box plots: Population
+figure;
+subplot(2,3,1)
+boxplot(Acc_Health,Activities);
+ylim([0 1.1]);
+title('Healthy to Healthy');
+boxplot_fill('b')
+
+subplot(2,3,2)
+boxplot(Acc_Stroke,Activities);
+boxplot_fill([0.5 0 0.5])
+ylim([0 1.1]);
+title('Healthy to Stroke (Home)');
+
+subplot(2,3,3)
+boxplot(Acc_LabHomeHome,Activities);
+boxplot_fill('r')
+ylim([0 1.1]);
+title('Stroke (Lab+Home) to Stroke (Home)');
+
+subplot(2,3,[4:6])
+BalAcc_Health=nanmean(Acc_Health,2);
+BalAcc_Stroke=nanmean(Acc_Stroke,2);
+BalAcc_LabHomeHome=nanmean(Acc_LabHomeHome,2);
+boxplot([BalAcc_Health BalAcc_Stroke BalAcc_LabHomeHome],{'Healthy to Healthy','Healthy to Stroke','Stroke to Stroke'})
+boxplot_fill('b',3); boxplot_fill([0.5 0 0.5],2); boxplot_fill('r',1)
