@@ -19,7 +19,7 @@ numAct=length(Activities);
 
 load('RUSConfusion');
 
-% Confustion Matrix
+% Confusion Matrix
 for i=1:size(ConfMat,3)
     ConfMatAll(:,:,i)=ConfMat{i};
 end
@@ -30,7 +30,14 @@ correctones = repmat(correctones,[1 6]);
 figure; imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
 set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
+xlabel('Predicted Activities'); ylabel('True Activities');
 title('Healthy to Healthy')
+
+for i=1:numAct
+    for j=1:numAct
+        text(i-0.25,j,num2str(ConfMat(i,j)));
+    end
+end
 
 % % Box plots
 % F1_Healthy=calc_f1(ConfMatAll);
@@ -48,7 +55,14 @@ correctones = repmat(correctones,[1 6]);
 figure; imagesc(ConfMat./correctones); colorbar
 set(gca,'XTickLabels',Activities)
 set(gca,'YTickLabels',Activities)
+xlabel('Predicted Activities'); ylabel('True Activities');
 title('Healthy to Stroke Home')
+
+for i=1:numAct
+    for j=1:numAct
+        text(i-0.25,j,num2str(ConfMat(i,j)));
+    end
+end
 
 % % Box plots
 % F1_Stroke(i,:)=calc_f1(ConfMat);
@@ -77,11 +91,18 @@ ConfMatAll=sum(ConfMatAll,3);
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
 figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
+xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke Lab+Home to Stroke Lab');
 set(gca,'XTickLabel',Activities)
 set(gca,'YTickLabel',Activities)
 set(gca,'XTick',[1 2 3 4 5 6])
 set(gca,'YTick',[1 2 3 4 5 6])
+
+for i=1:numAct
+    for j=1:numAct
+        text(i-0.25,j,num2str(ConfMatAll(i,j)));
+    end
+end
 
 % Confusion Matrix: Lab+Home --> Home 
 subjinds=cellfun(@(x) ~isempty(x), LabHomeConfMatHome(:,1));
@@ -100,12 +121,18 @@ ConfMatAll=sum(ConfMatAll,3);
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
 figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
+xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke Lab+Home to Stroke Home');
 set(gca,'XTickLabel',Activities)
 set(gca,'YTickLabel',Activities)
 set(gca,'XTick',[1 2 3 4 5 6])
 set(gca,'YTick',[1 2 3 4 5 6])
 
+for i=1:numAct
+    for j=1:numAct
+        text(i-0.25,j,num2str(ConfMatAll(i,j)));
+    end
+end
 
 % Box plots
 for i=1:length(subjinds)

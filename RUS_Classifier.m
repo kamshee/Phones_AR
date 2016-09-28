@@ -7,8 +7,8 @@ ntrees=200;
 rmvFeat=1;
 if rmvFeat
     load NormImp
-    %FeatInds=find(norm_imp>.25);
-    FeatInds=find(norm_imp(1:end-8)>.25);
+    FeatInds=find(norm_imp>.25);
+    %FeatInds=find(norm_imp(1:end-8)>.25); % Run w/o barometer features
 else
     FeatInds=1:270;
 end
