@@ -94,29 +94,41 @@ end
 
 % Box plots: Environment-specific
 figure;
-subplot(2,2,1);
+subplot(2,4,1);
 boxplot(Acc_LabLab,Activities);
-boxplot_fill('y')
 ylim([0 1.1]);
 title('Stroke Lab to Stroke Lab');
 
-subplot(2,2,2);
+subplot(2,4,2);
 boxplot(Acc_LabHome,Activities);
-boxplot_fill([1 0.5 0])
+boxplot_fill('y')
 ylim([0 1.1]);
 title('Stroke Lab to Stroke Home');
 
-subplot(2,2,3);
+subplot(2,4,3);
 boxplot(Acc_LabHomeLab,Activities);
-boxplot_fill([1 0.5 0])
 ylim([0 1.1]);
 title('Stroke Lab+Home to Stroke Lab');
 
-subplot(2,2,4);
+subplot(2,4,4);
 boxplot(Acc_LabHomeHome,Activities);
-boxplot_fill('r')
+boxplot_fill([1 0.5 0])
 ylim([0 1.1]);
 title('Stroke Lab+Home to Stroke Home');
+
+subplot(2,4,[5:8])
+BalAcc_LabLab=nanmean(Acc_LabLab,2);
+BalAcc_LabHome=nanmean(Acc_LabHome,2);
+BalAcc_LabHomeLab=nanmean(Acc_LabHomeLab,2);
+BalAcc_LabHomeHome=nanmean(Acc_LabHomeHome,2);
+mdl = [repmat({'Lab to Lab'}, length(BalAcc_LabLab), 1); ...
+    repmat({'Lab to Home'}, length(BalAcc_LabHome), 1); ...
+    repmat({'Lab+Home to Lab'}, length(BalAcc_LabHomeLab), 1); ...
+    repmat({'Lab+Home to Home'}, length(BalAcc_LabHomeHome), 1)];
+
+boxplot([BalAcc_LabLab; BalAcc_LabHome; BalAcc_LabHomeLab; BalAcc_LabHomeHome],mdl)
+boxplot_fill('y',3); boxplot_fill([1 0.5 0],1)
+ylim([0 1.1]); ylabel('Balanced Accuracy');
 
 %% Healthy to Healthy
 
@@ -149,7 +161,7 @@ end
 
 %% Healthy to Stroke Home
 
-load('ConfusionMat_strokeHome.mat')
+load('ConfusionMat_strokeAll.mat')
 
 % Confusion Matrix
 for i=1:size(ConfMat,2)
@@ -172,8 +184,8 @@ for i=1:numAct
 end
 
 % Accuracy
-for i=1:length(subjinds)
-    indSub=subjinds(i);
+for i=1:30%length(subjinds)
+    indSub=i;%subjinds(i);
     Acc_Stroke(i,:)=calc_classacc(ConfMat{indSub});
 end
 
@@ -189,7 +201,7 @@ subplot(2,3,2)
 boxplot(Acc_Stroke,Activities);
 boxplot_fill([0.5 0 0.5])
 ylim([0 1.1]);
-title('Healthy to Stroke (Home)');
+title('Healthy to Stroke (All)');
 
 subplot(2,3,3)
 boxplot(Acc_LabHomeHome,Activities);
@@ -200,6 +212,9 @@ title('Stroke (Lab+Home) to Stroke (Home)');
 subplot(2,3,[4:6])
 BalAcc_Health=nanmean(Acc_Health,2);
 BalAcc_Stroke=nanmean(Acc_Stroke,2);
-BalAcc_LabHomeHome=nanmean(Acc_LabHomeHome,2);
-boxplot([BalAcc_Health BalAcc_Stroke BalAcc_LabHomeHome],{'Healthy to Healthy','Healthy to Stroke','Stroke to Stroke'})
+mdl = [repmat({'Healthy to Healthy'}, length(BalAcc_Health), 1); ...
+    repmat({'Healthy to Stroke'}, length(BalAcc_Stroke), 1); ...
+    repmat({'Stroke (Lab+Home) to Stroke (Home)'}, length(BalAcc_LabHomeHome), 1)];
+boxplot([BalAcc_Health; BalAcc_Stroke; BalAcc_LabHomeHome],mdl)
 boxplot_fill('b',3); boxplot_fill([0.5 0 0.5],2); boxplot_fill('r',1)
+ylim([0 1.1]); ylabel('Balanced Accuracy');
