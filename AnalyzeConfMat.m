@@ -17,17 +17,18 @@ numAct=length(Activities);
 
 %% Lab vs. Home
 load('ConfusionMat_strokestrokeHome');
+load('DirectComp_LabvsHome');
 
-% Confusion Matrix: Lab+Home --> Lab 
-subjinds=cellfun(@(x) ~isempty(x), LabHomeConfMatLab(:,1));
-ConfMatAll=zeros(length(Activities),length(Activities),sum(subjinds),size(LabHomeConfMatLab,2));
+% Confusion Matrix: Lab --> Home
+subjinds=cellfun(@(x) ~isempty(x), LabConfMatHome(:));
+ConfMatAll=zeros(length(Activities),length(Activities),sum(subjinds),size(LabConfMatHome,2));
 
 subjinds=find(subjinds);
 
 for i=1:length(subjinds)
     ind=subjinds(i);
-    for j=1:size(LabHomeConfMatLab,2)
-        ConfMatAll(:,:,ind,j)=LabHomeConfMatLab{ind,j};
+    for j=1:size(LabConfMatHome,2)
+        ConfMatAll(:,:,ind,j)=LabConfMatHome{ind};
     end
 end
 ConfMatAll=sum(ConfMatAll,4);
@@ -86,12 +87,12 @@ end
 for i=1:length(subjinds)
     indSub=subjinds(i);
     
-    Acc_LabLab(i,:)=calc_classacc(LabConfMatLab{indSub});
+    Acc_Lab_HomeHome(i,:)=calc_classacc(sum(cat(3,Lab_HometoHome{indSub,:}),3));
     Acc_LabHome(i,:)=calc_classacc(LabConfMatHome{indSub});
     
-    LabHomeConfMatLab_sub=cat(3,LabHomeConfMatLab{indSub,:});
+    LabHomeConfMatLab_sub=cat(3,HometoHome{indSub,:});
     LabHomeConfMatHome_sub=cat(3,LabHomeConfMatHome{indSub,:});
-    Acc_LabHomeLab(i,:)=calc_classacc(sum(LabHomeConfMatLab_sub,3));
+    Acc_HometoHome(i,:)=calc_classacc(sum(LabHomeConfMatLab_sub,3));
     Acc_LabHomeHome(i,:)=calc_classacc(sum(LabHomeConfMatHome_sub,3));
 
 end
@@ -99,9 +100,9 @@ end
 % Box plots: Environment-specific
 figure;
 subplot(2,4,1);
-boxplot(Acc_LabLab,Activities);
+boxplot(Acc_Lab_HomeHome,Activities);
 ylim([0 1.1]);
-title('Stroke Lab to Stroke Lab');
+title('Stroke Lab-Home to Home');
 
 subplot(2,4,2);
 boxplot(Acc_LabHome,Activities);
@@ -110,9 +111,9 @@ ylim([0 1.1]);
 title('Stroke Lab to Stroke Home');
 
 subplot(2,4,3);
-boxplot(Acc_LabHomeLab,Activities);
+boxplot(Acc_HometoHome,Activities);
 ylim([0 1.1]);
-title('Stroke Lab+Home to Stroke Lab');
+title('Stroke Home to Home');
 
 subplot(2,4,4);
 boxplot(Acc_LabHomeHome,Activities);
@@ -121,9 +122,9 @@ ylim([0 1.1]);
 title('Stroke Lab+Home to Stroke Home');
 
 subplot(2,4,[5:8])
-BalAcc_LabLab=nanmean(Acc_LabLab,2);
+BalAcc_LabLab=nanmean(Acc_Lab_HomeHome,2);
 BalAcc_LabHome=nanmean(Acc_LabHome,2);
-BalAcc_LabHomeLab=nanmean(Acc_LabHomeLab,2);
+BalAcc_LabHomeLab=nanmean(Acc_HometoHome,2);
 BalAcc_LabHomeHome=nanmean(Acc_LabHomeHome,2);
 mdl = [repmat({'Lab to Lab'}, length(BalAcc_LabLab), 1); ...
     repmat({'Lab to Home'}, length(BalAcc_LabHome), 1); ...
