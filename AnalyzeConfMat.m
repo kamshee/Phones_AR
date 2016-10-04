@@ -312,19 +312,19 @@ subplot(2,3,4)
 boxplot([Acc_Health BalAcc_Health]);
 ylim([0 1.1]);
 title('Healthy to Healthy');
-boxplot_fill('b')
+%boxplot_fill('b')
 
 subplot(2,3,5)
 % boxplot(Acc_Stroke,Activities);
 boxplot([Acc_Stroke BalAcc_Stroke]);
-boxplot_fill([0.5 0 0.5])
+%boxplot_fill([0.5 0 0.5])
 ylim([0 1.1]);
 title('Healthy to Stroke (All)');
 
 subplot(2,3,6)
 % boxplot(Acc_StrokePop,Activities);
 boxplot([Acc_StrokePop BalAcc_StrokePop]);
-boxplot_fill('r')
+%boxplot_fill('r')
 ylim([0 1.1]);
 title('Stroke to Stroke');
 
@@ -338,6 +338,14 @@ title('Stroke to Stroke');
 % boxplot([BalAcc_Health; BalAcc_Stroke; BalAcc_StrokePop],mdl)
 % boxplot_fill('b',3); boxplot_fill([0.5 0 0.5],2); boxplot_fill('r',1)
 % ylim([0 1.1]); ylabel('Balanced Accuracy');
+
+% Save figure
+% h=gcf;
+% set(h,'Units','Inches');
+% pos = get(h,'Position');
+% set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+% print(h,'Fig3','-dpdf','-r0')
+
 
 %% Histograms of class distributions
 
