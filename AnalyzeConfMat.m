@@ -37,7 +37,7 @@ correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
 figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
 xlabel('Predicted Activities'); ylabel('True Activities');
-title('Stroke Lab+Home to Stroke Lab');
+title('Stroke Lab to Stroke Home');
 set(gca,'XTickLabel',Activities)
 set(gca,'YTickLabel',Activities)
 set(gca,'XTick',[1 2 3 4 5 6])
@@ -134,16 +134,16 @@ ylim([0 1.1]);
 title('Stroke Lab+Home to Stroke Home');
 
 subplot(2,4,[5:8])
-BalAcc_LabLab=nanmean(Acc_Lab_HomeHome,2);
+BalAcc_Lab_HomeHome=nanmean(Acc_Lab_HomeHome,2);
 BalAcc_LabHome=nanmean(Acc_LabHome,2);
-BalAcc_LabHomeLab=nanmean(Acc_HometoHome,2);
+BalAcc_HomeHome=nanmean(Acc_HometoHome,2);
 BalAcc_LabHomeHome=nanmean(Acc_LabHomeHome,2);
-mdl = [repmat({'Lab to Lab'}, length(BalAcc_LabLab), 1); ...
+mdl = [repmat({'Lab-Home to Home'}, length(BalAcc_Lab_HomeHome), 1); ...
     repmat({'Lab to Home'}, length(BalAcc_LabHome), 1); ...
-    repmat({'Lab+Home to Lab'}, length(BalAcc_LabHomeLab), 1); ...
+    repmat({'Home to Home'}, length(BalAcc_HomeHome), 1); ...
     repmat({'Lab+Home to Home'}, length(BalAcc_LabHomeHome), 1)];
 
-boxplot([BalAcc_LabLab; BalAcc_LabHome; BalAcc_LabHomeLab; BalAcc_LabHomeHome],mdl)
+boxplot([BalAcc_Lab_HomeHome; BalAcc_LabHome; BalAcc_HomeHome; BalAcc_LabHomeHome],mdl)
 boxplot_fill('y',3); boxplot_fill([1 0.5 0],1)
 ylim([0 1.1]); ylabel('Balanced Accuracy');
 
