@@ -77,6 +77,14 @@ for indFold=1:length(Home)
     
     Subjs_w_Home=cellfun(@(x) ~size(Home(indFold).Features,1)<60,{Home.Features});
     
+    %% Combine Sitting/Lying and Stairs Up/Down for environmental models
+    
+    ly_inds=strcmp('Lying',Label);
+    Label(ly_inds)={'Sitting'};
+    
+    st_inds=strmatch('Stairs ',Label);
+    Label(st_inds)={'Stair'};
+    
     TrainFeat=Feat(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2)',:);
     TrainLabel=Label(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2)').';
     TempSubjs=Subjs(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2)');
@@ -98,10 +106,10 @@ for indFold=1:length(Home)
         end
     end
     
-%     t = templateTree('MinLeafSize',5);
-%     RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
-%     LabelsRF = predict(RFModel,TestFeat);
-%     LabConfMatHome{indFold}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
+    t = templateTree('MinLeafSize',5);
+    RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
+    LabelsRF = predict(RFModel,TestFeat);
+    LabConfMatHome{indFold}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
     
 %     TestFeatLab=Feat(~HomeInds & Subjs==indFold,:);
 %     TestLabelLab=Label(~HomeInds & Subjs==indFold);     
@@ -112,7 +120,7 @@ for indFold=1:length(Home)
     
     %% Resample and test Lab+Home->Home
     Subjs_w_Home=find(Subjs_w_Home);
-    parfor indResample=1:10
+    for indResample=1:3
     
         TrainFeat=[];
         TrainLabel={};
@@ -153,16 +161,16 @@ for indFold=1:length(Home)
         end
 
         t = templateTree('MinLeafSize',5);
-%         RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
-%         LabelsRF = predict(RFModel,TestFeat);
-%         LabHomeConfMatHome{indFold,indResample}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
+        RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
+        LabelsRF = predict(RFModel,TestFeat);
+        LabHomeConfMatHome{indFold,indResample}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
         
 %         LabelsRF = predict(RFModel,TestFeatLab);
 %         LabHomeConfMatLab{indFold,indResample}=confusionmat([Activities'; TestLabelLab], [Activities'; LabelsRF])-eye(6);
         
-%         RFModel=fitensemble(HomeFeat,HomeLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
-%         LabelsRF = predict(RFModel,TestFeat);
-%         HometoHome{indFold,indResample}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
+        RFModel=fitensemble(HomeFeat,HomeLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
+        LabelsRF = predict(RFModel,TestFeat);
+        HometoHome{indFold,indResample}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
         
         RFModel=fitensemble(LabFeat,LabLabel,'RUSBoost',ntrees,t,'LearnRate',0.1);
         LabelsRF = predict(RFModel,TestFeat);
