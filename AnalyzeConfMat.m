@@ -72,6 +72,9 @@ for i=1:length(subjinds)
     end
 end
 ConfMatAll=sum(ConfMatAll,4);
+
+subjs_w_6=all(sum(ConfMatAll,2),1);
+
 ConfMatAll=sum(ConfMatAll,3);
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
@@ -95,6 +98,10 @@ for i=1:numAct
     end
 end
 
+
+subjinds=cellfun(@(x) ~isempty(x), LabHomeConfMatHome(:,1));
+subjinds=subjinds & permute(subjs_w_6,[3 2 1]);
+subjinds=find(subjinds);
 % Accuracy
 for i=1:length(subjinds)
     indSub=subjinds(i);
