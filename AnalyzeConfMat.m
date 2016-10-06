@@ -259,7 +259,7 @@ for i=1:size(ConfMat,2)
 end
 HealthyCounts=sum(sum(ConfMatAll,3),2);
 
-%% Healthy to Stroke Home
+%% Healthy to Stroke (Lab and Home)
 
 load('ConfusionMat_strokeAll.mat')
 
@@ -358,6 +358,30 @@ title('Stroke to Stroke');
 % set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
 % print(h,'Fig3','-dpdf','-r0')
 
+%% Healthy to Stroke by stroke severity
+
+strokeSev={'Mild','Mod','Sev'};
+
+figure;
+for indStroke=1:length(strokeSev)
+    load(['ConfusionMat_strokeAll_' strokeSev{indStroke} '.mat'])
+
+    % Confusion Matrix
+    ConfMatAll=nansum(ConfMatAll,3);
+    correctones = sum(ConfMatAll,2);
+    correctones = repmat(correctones,[1 6]);
+    subplot(2,3,indStroke), imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
+    set(gca,'XTickLabels',Activities)
+    set(gca,'YTickLabels',Activities)
+    xlabel('Predicted Activities'); ylabel('True Activities');
+    title(['Healthy to Stroke ' strokeSev{indStroke}])
+    
+%     % Accuracy
+%     for i=1:30%length(subjinds)
+%         indSub=i;%subjinds(i);
+%         Acc_Stroke(i,:)=calc_classacc(ConfMat{indSub});
+%     end
+end
 
 %% Histograms of class distributions
 

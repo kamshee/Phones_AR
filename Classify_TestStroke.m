@@ -89,7 +89,7 @@ LabelTest=TestLabels;
 
 t = templateTree('MinLeafSize',5);
 RFModel=fitensemble(FeatTrain,LabelTrain,'RUSBoost',ntrees,t,'LearnRate',0.1);
-%%
+%% Healthy --> Stroke (by Severity)
 for indStroke=1:length(strokeClass)
     indFeat=sum(bsxfun(@eq, SubjectID, strokeClass{2,indStroke}),2);
     indFeat=logical(indFeat);
@@ -99,6 +99,8 @@ for indStroke=1:length(strokeClass)
     k=length(TPInd);
     Acc=sum(TPInd)/k;
 
+    clear ConfMat
+    ConfMatAll=zeros(length(Activities),length(Activities),length(AllFeat));
     for indSub=1:length(AllFeat)
         if any(indSub==strokeClass{2,indStroke})
             ConfMat{indSub}=confusionmat([Activities'; LabelTest(SubjectID==indSub)], [Activities'; LabelsRF(SubjectID(indFeat)==indSub)])-eye(6);
