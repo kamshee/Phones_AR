@@ -19,9 +19,11 @@ numAct=length(Activities);
 load('ConfusionMat_strokestrokeHome');
 load('DirectComp_LabvsHome');
 
+Envir_Activities={'Sitting', 'Standing', 'Stair', 'Walking'};
+
 % Confusion Matrix: Lab --> Home
 subjinds=cellfun(@(x) ~isempty(x), LabConfMatHome(:));
-ConfMatAll=zeros(length(Activities),length(Activities),sum(subjinds),size(LabConfMatHome,2));
+ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),sum(subjinds),size(LabConfMatHome,2));
 
 subjinds=find(subjinds);
 
@@ -34,17 +36,17 @@ end
 ConfMatAll=sum(ConfMatAll,4);
 ConfMatAll=sum(ConfMatAll,3);
 correctones = sum(ConfMatAll,2);
-correctones = repmat(correctones,[1 6]);
+correctones = repmat(correctones,[1 length(Envir_Activities)]);
 figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke Lab to Stroke Home');
 set(gca,'XTickLabel',Activities)
 set(gca,'YTickLabel',Activities)
-set(gca,'XTick',[1 2 3 4 5 6])
-set(gca,'YTick',[1 2 3 4 5 6])
+set(gca,'XTick',1:length(Envir_Activities))
+set(gca,'YTick',1:length(Envir_Activities))
 
-for i=1:numAct
-    for j=1:numAct
+for i=1:length(Envir_Activities)
+    for j=1:length(Envir_Activities)
         conf_str=num2str(ConfMatAll(j,i));
         if ConfMatAll(j,i)/correctones(j,i)<0.15
             txtclr='w';
@@ -57,11 +59,11 @@ end
 
 % Confusion Matrix: Lab+Home --> Home 
 subjinds=cellfun(@(x) ~isempty(x), LabHomeConfMatHome(:,1));
-ConfMatAll=zeros(length(Activities),length(Activities),sum(subjinds),size(LabHomeConfMatHome,2));
+ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),sum(subjinds),size(LabHomeConfMatHome,2));
 
 subjinds=find(subjinds);
 
-StrokeHomeCounts=zeros(6,15);
+StrokeHomeCounts=zeros(length(Envir_Activities),15);
 for i=1:length(subjinds)
     ind=subjinds(i);
     for j=1:size(LabHomeConfMatHome,2)
@@ -73,21 +75,21 @@ for i=1:length(subjinds)
 end
 ConfMatAll=sum(ConfMatAll,4);
 
-subjs_w_6=all(sum(ConfMatAll,2),1);
+subjs_w_All=all(sum(ConfMatAll,2),1);
 
 ConfMatAll=sum(ConfMatAll,3);
 correctones = sum(ConfMatAll,2);
-correctones = repmat(correctones,[1 6]);
+correctones = repmat(correctones,[1 length(Envir_Activities)]);
 figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke Lab+Home to Stroke Home');
 set(gca,'XTickLabel',Activities)
 set(gca,'YTickLabel',Activities)
-set(gca,'XTick',[1 2 3 4 5 6])
-set(gca,'YTick',[1 2 3 4 5 6])
+set(gca,'XTick',1:length(Envir_Activities))
+set(gca,'YTick',1:length(Envir_Activities))
 
-for i=1:numAct
-    for j=1:numAct
+for i=1:length(Envir_Activities)
+    for j=1:length(Envir_Activities)
         conf_str=num2str(ConfMatAll(j,i));
         if ConfMatAll(j,i)/correctones(j,i)<0.15
             txtclr='w';
@@ -100,7 +102,7 @@ end
 
 
 subjinds=cellfun(@(x) ~isempty(x), LabHomeConfMatHome(:,1));
-subjinds=subjinds & permute(subjs_w_6,[3 2 1]);
+subjinds=subjinds & permute(subjs_w_All,[3 2 1]);
 subjinds=find(subjinds);
 % Accuracy
 for i=1:length(subjinds)
@@ -119,23 +121,23 @@ end
 % Box plots: Environment-specific
 figure;
 subplot(2,4,1);
-boxplot(Acc_Lab_HomeHome,Activities);
+boxplot(Acc_Lab_HomeHome,Envir_Activities);
 ylim([0 1.1]);
 title('Stroke Lab-Home to Home');
 
 subplot(2,4,2);
-boxplot(Acc_LabHome,Activities);
+boxplot(Acc_LabHome,Envir_Activities);
 boxplot_fill('y')
 ylim([0 1.1]);
 title('Stroke Lab to Stroke Home');
 
 subplot(2,4,3);
-boxplot(Acc_HometoHome,Activities);
+boxplot(Acc_HometoHome,Envir_Activities);
 ylim([0 1.1]);
 title('Stroke Home to Home');
 
 subplot(2,4,4);
-boxplot(Acc_LabHomeHome,Activities);
+boxplot(Acc_LabHomeHome,Envir_Activities);
 boxplot_fill([1 0.5 0])
 ylim([0 1.1]);
 title('Stroke Lab+Home to Stroke Home');
@@ -155,6 +157,8 @@ boxplot_fill('y',3); boxplot_fill([1 0.5 0],1)
 ylim([0 1.1]); ylabel('Balanced Accuracy');
 
 %% Stroke to Stroke Population
+
+ConfMatAll=zeros(length(Activities),length(Activities),size(PopConfMat,2));
 
 % Confusion Matrix
 for i=1:size(PopConfMat,2)
@@ -388,12 +392,12 @@ ticklabels={};
 
 figure, hold on
 for i=1:length(StrokeHomeCounts)
-    bar(7*(i-1)+1:7*i-1,StrokeHomeCounts(:,i)/sum(StrokeHomeCounts(:,i)),'FaceColor',[1 .5 0],'BarWidth',1)
-    ticks=[ticks 7*(i-1)+1:7*i-1];
+    bar((length(Envir_Activities)+1)*(i-1)+1:(length(Envir_Activities)+1)*i-1,StrokeHomeCounts(:,i)/sum(StrokeHomeCounts(:,i)),'FaceColor',[1 .5 0],'BarWidth',1)
+    ticks=[ticks (length(Envir_Activities)+1)*(i-1)+1:(length(Envir_Activities)+1)*i-1];
     ticklabels=[ticklabels Activities_abr];
-    for j=1:6
+    for j=1:(length(Envir_Activities))
         if StrokeHomeCounts(j,i)
-            text(7*(i-1)+j,StrokeHomeCounts(j,i)/sum(StrokeHomeCounts(:,i))+.015,num2str(StrokeHomeCounts(j,i)),'Rotation',90)
+            text((length(Envir_Activities)+1)*(i-1)+j,StrokeHomeCounts(j,i)/sum(StrokeHomeCounts(:,i))+.015,num2str(StrokeHomeCounts(j,i)),'Rotation',90)
         end
     end
 end
