@@ -21,6 +21,12 @@ load('Z:\RERC- Phones\Server Data\Clips\10s\PhoneData_Feat.mat')
 Features=[];
 Labels={};
 
+% Mild, Moderate, Severe stroke subjects
+strokeClass={'Mild','Mod','Sev'};
+strokeClass = [strokeClass; {[7 11 14 18 24 26 29 30],...
+    [1 8 10 12 13 15 16 19 20 21 22 25 28],...
+    [2 3 4 5 6 9 17 23 27]}];
+
 for indSubj=1:length(AllFeat)
     tempLabels=AllFeat(indSubj).ActivityLabel;
     
@@ -73,66 +79,73 @@ end
 
 TestLabels=TestLabels.';
 
-FeatTrain=Features(:,2:end);
+FeatTrain=Features(:,FeatInds+1);
 LabelTrain=Labels;
 
 % Healthy --> Stroke all
 SubjectID=TestFeatures(:,1);
-FeatTest=TestFeatures(:,2:end);
+FeatTest=TestFeatures(:,FeatInds+1);
 LabelTest=TestLabels;
 
 t = templateTree('MinLeafSize',5);
 RFModel=fitensemble(FeatTrain,LabelTrain,'RUSBoost',ntrees,t,'LearnRate',0.1);
-LabelsRF = predict(RFModel,FeatTest);
+%%
+for indStroke=1:length(strokeClass)
+    indFeat=sum(bsxfun(@eq, SubjectID, strokeClass{2,indStroke}),2);
+    indFeat=logical(indFeat);
+    LabelsRF = predict(RFModel,FeatTest(indFeat,:));
 
-TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
-k=length(TPInd);
-Acc=sum(TPInd)/k;
+    TPInd=cellfun(@strcmp, LabelsRF, LabelTest(indFeat));
+    k=length(TPInd);
+    Acc=sum(TPInd)/k;
 
-for indSub=1:length(AllFeat)
-    ConfMat{indSub}=confusionmat([Activities'; LabelTest(SubjectID==indSub)], [Activities'; LabelsRF(SubjectID==indSub)])-eye(6);
-    ConfMatAll(:,:,indSub)=ConfMat{indSub};
+    for indSub=1:length(AllFeat)
+        if any(indSub==strokeClass{2,indStroke})
+            ConfMat{indSub}=confusionmat([Activities'; LabelTest(SubjectID==indSub)], [Activities'; LabelsRF(SubjectID(indFeat)==indSub)])-eye(6);
+            ConfMatAll(:,:,indSub)=ConfMat{indSub};
+        end
+    end
+    ConfMatAll=sum(ConfMatAll,3);
+    PredLabels=LabelsRF;
+
+    save(['ConfusionMat_strokeAll_' strokeClass{1,indStroke} '.mat'],'ConfMat','ConfMatAll')
+
+    correctones = sum(ConfMatAll,2);
+    correctones = repmat(correctones,[1 6]);
+    figure; imagesc(ConfMatAll./correctones); colorbar
+    set(gca,'XTickLabels',Activities)
+    set(gca,'YTickLabels',Activities)
+
+    savefig(['ConfusionMat_strokeAll_' strokeClass{1,indStroke}])
 end
-ConfMatAll=sum(ConfMatAll,3);
-PredLabels=LabelsRF;
 
-save('ConfusionMat_strokeAll.mat','ConfMat','ConfMatAll')
-
-correctones = sum(ConfMatAll,2);
-correctones = repmat(correctones,[1 6]);
-figure; imagesc(ConfMatAll./correctones); colorbar
-set(gca,'XTickLabels',Activities)
-set(gca,'YTickLabels',Activities)
-
-savefig('ConfusionMat_strokeAll')
-
-% Healthy --> Stroke Home
-SubjectID=TestFeatures(indHomeStart+1:end,1);
-FeatTest=TestFeatures(indHomeStart+1:end,2:end);
-LabelTest=TestLabels(indHomeStart+1:end);
-
-LabelsRF = predict(RFModel,FeatTest);
-
-TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
-k=length(TPInd);
-Acc=sum(TPInd)/k;
-
-for indSub=1:length(AllFeat)
-    ConfMat{indSub}=confusionmat([Activities'; LabelTest(SubjectID==indSub)], [Activities'; LabelsRF(SubjectID==indSub)])-eye(6);
-    ConfMatAll(:,:,indSub)=ConfMat{indSub};
-end
-ConfMatAll=sum(ConfMatAll,3);
-PredLabels=LabelsRF;
-
-save('ConfusionMat_strokeHome.mat','ConfMat','ConfMatAll')
-
-correctones = sum(ConfMatAll,2);
-correctones = repmat(correctones,[1 6]);
-figure; imagesc(ConfMatAll./correctones); colorbar
-set(gca,'XTickLabels',Activities)
-set(gca,'YTickLabels',Activities)
-
-savefig('ConfusionMat_strokeHome')
+% % Healthy --> Stroke Home
+% SubjectID=TestFeatures(indHomeStart+1:end,1);
+% FeatTest=TestFeatures(indHomeStart+1:end,2:end);
+% LabelTest=TestLabels(indHomeStart+1:end);
+% 
+% LabelsRF = predict(RFModel,FeatTest);
+% 
+% TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
+% k=length(TPInd);
+% Acc=sum(TPInd)/k;
+% 
+% for indSub=1:length(AllFeat)
+%     ConfMat{indSub}=confusionmat([Activities'; LabelTest(SubjectID==indSub)], [Activities'; LabelsRF(SubjectID==indSub)])-eye(6);
+%     ConfMatAll(:,:,indSub)=ConfMat{indSub};
+% end
+% ConfMatAll=sum(ConfMatAll,3);
+% PredLabels=LabelsRF;
+% 
+% save('ConfusionMat_strokeHome.mat','ConfMat','ConfMatAll')
+% 
+% correctones = sum(ConfMatAll,2);
+% correctones = repmat(correctones,[1 6]);
+% figure; imagesc(ConfMatAll./correctones); colorbar
+% set(gca,'XTickLabels',Activities)
+% set(gca,'YTickLabels',Activities)
+% 
+% savefig('ConfusionMat_strokeHome')
 
 %% Calculations to evaluate models
 % for i=1:length(AllFeat) 
