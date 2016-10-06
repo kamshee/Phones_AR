@@ -28,12 +28,22 @@ load('Z:\RERC- Phones\Stroke\Clips\Home_Feat.mat')
 
 Home=AllFeat;
 
+for i=1:length(Home)
+    for j=1:length(Activities)
+        counts(j)=sum(strcmp(Home(i).ActivityLabel,Activities{j}));
+    end
+    Subjs_w_All(i)=all([counts(1)+counts(2) counts(3) counts(4)+counts(5) counts(6)]);
+end
+
 Feat=[];
 Label={};
 Subjs=[];
 HomeInds=[];
 
 for i=1:length(Train)
+    if ~Subjs_w_All(i)
+        continue
+    end
     Feat=[Feat; Train(i).Features];
     Label=[Label Train(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Train(i).ActivityLabel)])];
@@ -41,6 +51,9 @@ for i=1:length(Train)
 end
 
 for i=1:length(Test)
+    if ~Subjs_w_All(i)
+        continue
+    end
     Feat=[Feat; Test(i).Features];
     Label=[Label Test(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Test(i).ActivityLabel)])];
@@ -48,6 +61,9 @@ for i=1:length(Test)
 end
 
 for i=1:length(Home)
+    if ~Subjs_w_All(i)
+        continue
+    end
     Feat=[Feat; Home(i).Features];
     Label=[Label Home(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Home(i).ActivityLabel)])];
@@ -55,6 +71,7 @@ for i=1:length(Home)
 end
 
 for indFold=1:length(Home)
+    disp(indFold)
     
 %     TrainFeat=Feat(~HomeInds & Subjs~=indFold,:);
 %     TrainLabel=Label(~HomeInds & Subjs~=indFold).';
@@ -69,7 +86,7 @@ for indFold=1:length(Home)
 %     PopConfMat{indFold}=confusionmat([Activities'; TestLabel], [Activities'; LabelsRF])-eye(6);
     PopConfMat{indFold}=[];
     
-    if size(Home(indFold).Features,1)<60
+    if size(Home(indFold).Features,1)<60 || ~Subjs_w_All(indFold)
         continue
     end
     
@@ -91,7 +108,7 @@ for indFold=1:length(Home)
     TrainLabel=Label(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2)').';
     TempSubjs=Subjs(~HomeInds & Subjs~=indFold & sum(bsxfun(@eq,find(Subjs_w_Home),Subjs'),2)');
     
-    trainsizes=sum(bsxfun(@eq,find(Subjs_w_Home),TempSubjs'),1);
+    trainsizes=sum(bsxfun(@eq,find(Subjs_w_All),TempSubjs'),1);
 
     TestFeat=Feat(HomeInds & Subjs==indFold,:);
     TestLabel=Label(HomeInds & Subjs==indFold);     
@@ -121,7 +138,7 @@ for indFold=1:length(Home)
 %     LabConfMatLab{indFold}=confusionmat([Activities'; TestLabelLab], [Activities'; LabelsRF])-eye(6);
     
     %% Resample and test Lab+Home->Home
-    Subjs_w_Home=find(Subjs_w_Home);
+    Subjs_w_Home=find(Subjs_w_Home & Subjs_w_All);
     for indResample=1:3
     
         TrainFeat=[];
@@ -147,19 +164,27 @@ for indFold=1:length(Home)
                 LabLabel=[LabLabel; TempLabel(Lab_resampinds)'];
                 HomeFeat=[HomeFeat; TempHomeFeat];
                 HomeLabel=[HomeLabel; TempHomeLabel'];
+                
+                resampinds=randperm(size(TempFeat,1),max([trainsizes(i)-size(TempHomeFeat,1) 0]));
+                TempFeat=[TempFeat(resampinds,:); TempHomeFeat];
+                TempLabel=[TempLabel(resampinds) TempHomeLabel];
+                TrainFeat=[TrainFeat; TempFeat];
+                TrainLabel=[TrainLabel; TempLabel'];
             else
                 Lab_resampinds=randperm(size(TempHomeFeat,1),size(TempFeat,1));
                 LabFeat=[LabFeat; TempFeat];
                 LabLabel=[LabLabel; TempLabel'];
                 HomeFeat=[HomeFeat; TempHomeFeat(Lab_resampinds,:)];
                 HomeLabel=[HomeLabel; TempHomeLabel(Lab_resampinds)'];
+                
+                resampinds=randperm(size(TempFeat,1),max([trainsizes(i)-size(TempHomeFeat(Lab_resampinds,:),1) 0]));
+                TempFeat=[TempFeat(resampinds,:); TempHomeFeat(Lab_resampinds,:)];
+                TempLabel=[TempLabel(resampinds) TempHomeLabel(Lab_resampinds)];
+                TrainFeat=[TrainFeat; TempFeat];
+                TrainLabel=[TrainLabel; TempLabel'];
             end
 
-            resampinds=randperm(size(TempFeat,1),max([trainsizes(i)-size(TempHomeFeat,1) 0]));
-            TempFeat=[TempFeat(resampinds,:); TempHomeFeat];
-            TempLabel=[TempLabel(resampinds) TempHomeLabel];
-            TrainFeat=[TrainFeat; TempFeat];
-            TrainLabel=[TrainLabel; TempLabel'];
+            
         end
 
         t = templateTree('MinLeafSize',5);
@@ -181,6 +206,8 @@ for indFold=1:length(Home)
     end
 end
 
+PopConfMat=load('ConfusionMat_strokestrokeHome.mat','PopConfMat');
+PopConfMat=PopConfMat.PopConfMat;
 save('ConfusionMat_strokestrokeHome.mat','LabConfMatHome', 'LabHomeConfMatHome', 'PopConfMat')
 save('DirectComp_LabvsHome.mat','Lab_HometoHome','HometoHome')
 
