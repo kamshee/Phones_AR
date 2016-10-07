@@ -2,8 +2,6 @@
 % Run after GenerateClips.m
 clear all
 
-Subj_CrossVal=1;
-
 ntrees=200;
 
 rmvFeat=1;
