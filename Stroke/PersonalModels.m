@@ -102,8 +102,8 @@ correctones = repmat(correctones,[1 length(Envir_Activities)]);
 figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke Lab Day 1 to Stroke Home');
-set(gca,'XTickLabel',Activities)
-set(gca,'YTickLabel',Activities)
+set(gca,'XTickLabel',Envir_Activities)
+set(gca,'YTickLabel',Envir_Activities)
 set(gca,'XTick',1:length(Envir_Activities))
 set(gca,'YTick',1:length(Envir_Activities))
 

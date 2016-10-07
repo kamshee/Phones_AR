@@ -174,30 +174,7 @@ set(gca,'YTickLabels',Activities)
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke to Stroke')
 
-for i=1:numAct
-    for j=1:numAct
-        conf_str=num2str(.01*round(10000*ConfMatAll(j,i)/correctones(j,i)),'%10.3g');
-        % Add trailing zeros
-        if length(conf_str)<4 && ~strcmp('0',conf_str)
-            if isempty(regexp(conf_str,'\.','once'))
-                if length(conf_str)==2
-                    conf_str=[conf_str '.0'];
-                elseif length(conf_str)==1
-                    conf_str=[conf_str '.00'];
-                end
-            else
-                conf_str=[conf_str '0'];
-            end
-        end 
-            
-        if ConfMatAll(j,i)/correctones(j,i)<0.15
-            txtclr='w';
-        else
-            txtclr='k';
-        end
-        text(i-0.25,j,conf_str,'Color',txtclr);
-    end
-end
+addtexttoConfMat(ConfMatAll)
 
 % Accuracy
 for indSub=1:length(PopConfMat)
@@ -223,30 +200,7 @@ set(gca,'YTickLabels',Activities)
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Healthy to Healthy')
 
-for i=1:numAct
-    for j=1:numAct
-        conf_str=num2str(.01*round(10000*ConfMatAll(j,i)/correctones(j,i)),'%10.3g');
-        % Add trailing zeros
-        if length(conf_str)<4 && ~strcmp('0',conf_str)
-            if isempty(regexp(conf_str,'\.','once'))
-                if length(conf_str)==2
-                    conf_str=[conf_str '.0'];
-                elseif length(conf_str)==1
-                    conf_str=[conf_str '.00'];
-                end
-            else
-                conf_str=[conf_str '0'];
-            end
-        end        
-        
-        if ConfMatAll(j,i)/correctones(j,i)<0.15
-            txtclr='w';
-        else
-            txtclr='k';
-        end
-        text(i-0.25,j,conf_str,'Color',txtclr);
-    end
-end
+addtexttoConfMat(ConfMatAll)
 
 % Accuracy
 for indSub=1:length(ConfMat)
@@ -277,30 +231,7 @@ set(gca,'YTickLabels',Activities)
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Healthy to Stroke')
 
-for i=1:numAct
-    for j=1:numAct
-        conf_str=num2str(.01*round(10000*ConfMatAll(j,i)/correctones(j,i)),'%10.3g');
-        % Add trailing zeros
-        if length(conf_str)<4 && ~strcmp('0',conf_str)
-            if isempty(regexp(conf_str,'\.','once'))
-                if length(conf_str)==2
-                    conf_str=[conf_str '.0'];
-                elseif length(conf_str)==1
-                    conf_str=[conf_str '.00'];
-                end
-            else
-                conf_str=[conf_str '0'];
-            end
-        end 
-        
-        if ConfMatAll(j,i)/correctones(j,i)<0.15
-            txtclr='w';
-        else
-            txtclr='k';
-        end
-        text(i-0.25,j,conf_str,'Color',txtclr);
-    end
-end
+addtexttoConfMat(ConfMatAll)
 
 % Accuracy
 for i=1:30%length(subjinds)
@@ -376,11 +307,23 @@ for indStroke=1:length(strokeSev)
     xlabel('Predicted Activities'); ylabel('True Activities');
     title(['Healthy to Stroke ' strokeSev{indStroke}])
     
-%     % Accuracy
-%     for i=1:30%length(subjinds)
-%         indSub=i;%subjinds(i);
-%         Acc_Stroke(i,:)=calc_classacc(ConfMat{indSub});
-%     end
+    addtexttoConfMat(ConfMatAll)
+    
+    % Accuracy
+    subjinds=cellfun(@(x) ~isempty(x), ConfMat(:));
+    subjinds=find(subjinds);
+    for i=1:length(subjinds)
+        indSub=subjinds(i);
+        eval(['Acc_' strokeSev{indStroke} '(i,:)=calc_classacc(ConfMat{indSub});']);
+    end
+    
+    eval(['BalAcc_' strokeSev{indStroke} '_Sed=nanmean(Acc_' strokeSev{indStroke} '(:,1:3),2);']);
+    eval(['BalAcc_' strokeSev{indStroke} '_Amb=nanmean(Acc_' strokeSev{indStroke} '(:,4:6),2);']);
+    
+    subplot(2,3,3+indStroke)
+    eval(['boxplot([BalAcc_' strokeSev{indStroke} '_Sed BalAcc_' strokeSev{indStroke} '_Amb]);']);
+    ylim([0 1.1]);
+    title(['Healthy to ' strokeSev{indStroke}]);
 end
 
 %% Histograms of class distributions
