@@ -91,6 +91,7 @@ for i=1:length(Subjs_w_All)
     
 end
 %% Plot Results
+figure;
 ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),length(Subjs_w_All));
 
 for i=1:length(Subjs_w_All)
@@ -99,7 +100,7 @@ end
 ConfMatAll=sum(ConfMatAll,3);
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 length(Envir_Activities)]);
-figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
+subplot(3,2,1); imagesc(ConfMatAll./correctones, [0 1]); colorbar
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke Lab Day 1 to Stroke Home');
 set(gca,'XTickLabel',Envir_Activities)
@@ -115,7 +116,7 @@ end
 ConfMatAll=sum(ConfMatAll,3);
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 length(Envir_Activities)]);
-figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
+subplot(3,2,2); imagesc(ConfMatAll./correctones, [0 1]); colorbar
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke Lab Day 1 to Stroke Lab Day 2');
 set(gca,'XTickLabel',Activities)
@@ -134,25 +135,24 @@ for i=1:length(Subjs_w_All)
 end
 
 % Box plots: Environment-specific
-figure;
-subplot(2,2,1);
+subplot(3,2,3);
 boxplot(Acc_LabHome,Envir_Activities);
 ylim([0 1.1]);
 title('Acc Lab to Home');
 
-subplot(2,2,3);
+subplot(3,2,4);
 boxplot(Acc_LabLab,Envir_Activities);
-boxplot_fill('y')
+%boxplot_fill('y')
 ylim([0 1.1]);
 title('Acc Lab to Lab');
 
-subplot(2,2,2);
+subplot(3,2,5);
 boxplot(F1_LabHome,Envir_Activities);
 ylim([0 1.1]);
 title('F1 Lab to Home');
 
-subplot(2,2,4);
+subplot(3,2,6);
 boxplot(F1_LabLab,Envir_Activities);
-boxplot_fill('y')
+%boxplot_fill('y')
 ylim([0 1.1]);
 title('F1 Lab to Lab');
