@@ -25,6 +25,8 @@ load('Z:\RERC- Phones\Stroke\Clips\Home_Feat.mat')
 
 Home=AllFeat;
 
+total_counts=[];
+
 for i=1:length(Home)
     for j=1:length(Activities)
         counts(j)=sum(strcmp(Home(i).ActivityLabel,Activities{j}));
@@ -34,7 +36,13 @@ for i=1:length(Home)
     Subjs_w_All(i)=all([counts(1)+counts(2) counts(3) counts(4)+counts(5) counts(6)])...
         & all([train_counts(1)+train_counts(2) train_counts(3) train_counts(4)+train_counts(5) train_counts(6)])...
         & all([test_counts(1)+test_counts(2) test_counts(3) test_counts(4)+test_counts(5) test_counts(6)]);
+    total_counts(i,:)=[counts(1)+counts(2) counts(3) counts(4)+counts(5) counts(6)]+...
+        [train_counts(1)+train_counts(2) train_counts(3) train_counts(4)+train_counts(5) train_counts(6)]+...
+        [test_counts(1)+test_counts(2) test_counts(3) test_counts(4)+test_counts(5) test_counts(6)];
 end
+
+total_counts=total_counts(Subjs_w_All,:);
+total_counts=total_counts';
 
 Subjs_w_All=find(Subjs_w_All);
 
@@ -43,6 +51,7 @@ Label={};
 Subjs=[];
 HomeInds=[];
 
+%%
 for i=1:length(Subjs_w_All)
     
     % Lab (Day 1)
@@ -156,3 +165,24 @@ boxplot(F1_LabLab,Envir_Activities);
 %boxplot_fill('y')
 ylim([0 1.1]);
 title('F1 Lab to Lab');
+
+%% Histogram of class distribution
+Activities_abr={'Si+L', 'Stand', 'Strs' , 'Walk'};
+
+ticks=[];
+ticklabels={};
+
+figure, hold on
+for i=1:length(total_counts)
+    bar((length(Envir_Activities)+1)*(i-1)+1:(length(Envir_Activities)+1)*i-1,total_counts(:,i)/sum(total_counts(:,i)),'FaceColor',[1 .5 0],'BarWidth',1)
+    ticks=[ticks (length(Envir_Activities)+1)*(i-1)+2.5];
+    ticklabels=[ticklabels ['S' num2str(Subjs_w_All(i))]];
+    for j=1:(length(Envir_Activities))
+        if total_counts(j,i)
+            text((length(Envir_Activities)+1)*(i-1)+j,total_counts(j,i)/sum(total_counts(:,i))+.015,num2str(total_counts(j,i)),'Rotation',90)
+        end
+    end
+end
+ax=gca;
+ax.XTick=ticks;
+ax.XTickLabel=ticklabels;
