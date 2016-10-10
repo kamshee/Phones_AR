@@ -92,8 +92,8 @@ for i=1:length(Subjs_w_All)
 end
 %% Plot Results
 figure;
-ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),length(Subjs_w_All));
 
+ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),length(Subjs_w_All));
 for i=1:length(Subjs_w_All)
     ConfMatAll(:,:,i)=LabConfMatHome{i};
 end
@@ -107,9 +107,9 @@ set(gca,'XTickLabel',Envir_Activities)
 set(gca,'YTickLabel',Envir_Activities)
 set(gca,'XTick',1:length(Envir_Activities))
 set(gca,'YTick',1:length(Envir_Activities))
+addtexttoConfMat(ConfMatAll)
 
 ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),length(Subjs_w_All));
-
 for i=1:length(Subjs_w_All)
     ConfMatAll(:,:,i)=LabConfMatLab{i};
 end
@@ -123,6 +123,7 @@ set(gca,'XTickLabel',Activities)
 set(gca,'YTickLabel',Activities)
 set(gca,'XTick',1:length(Envir_Activities))
 set(gca,'YTick',1:length(Envir_Activities))
+addtexttoConfMat(ConfMatAll)
 
 % Accuracy
 for i=1:length(Subjs_w_All)
@@ -134,14 +135,17 @@ for i=1:length(Subjs_w_All)
     F1_LabLab(i,:)=calc_f1(LabConfMatLab{i});
 end
 
+BalAcc_LabHome=nanmean(Acc_LabHome,2);
+BalAcc_LabLab=nanmean(Acc_LabLab,2);
+
 % Box plots: Environment-specific
 subplot(3,2,3);
-boxplot(Acc_LabHome,Envir_Activities);
+boxplot([Acc_LabHome BalAcc_LabHome]);
 ylim([0 1.1]);
 title('Acc Lab to Home');
 
 subplot(3,2,4);
-boxplot(Acc_LabLab,Envir_Activities);
+boxplot([Acc_LabLab BalAcc_LabLab]);
 %boxplot_fill('y')
 ylim([0 1.1]);
 title('Acc Lab to Lab');
@@ -156,3 +160,6 @@ boxplot(F1_LabLab,Envir_Activities);
 %boxplot_fill('y')
 ylim([0 1.1]);
 title('F1 Lab to Lab');
+
+% % Save figure
+% savefig_pdf('Fig6')
