@@ -326,6 +326,83 @@ for indStroke=1:length(strokeSev)
     title(['Healthy to ' strokeSev{indStroke}]);
 end
 
+%% Severe to other stroke severity
+figure;
+
+% Confusion Matrix, Severe to Severe
+load('ConfusionMat_Sev_Sev.mat')
+
+ConfMatAll=nansum(ConfMatAll,3);
+actSed=[1 2 3]; %indices of sedentary activities
+actAmb=[4 5 6]; %indices of ambulatory activities
+ConfMatSimp(1,1)=nansum(nansum(ConfMatAll(actSed,actSed)));
+ConfMatSimp(1,2)=nansum(nansum(ConfMatAll(actSed,actAmb)));
+ConfMatSimp(2,1)=nansum(nansum(ConfMatAll(actAmb,actSed)));
+ConfMatSimp(2,2)=nansum(nansum(ConfMatAll(actAmb,actAmb)));
+correctones = sum(ConfMatSimp,2);
+correctones = repmat(correctones,[1 2]);
+subplot(2,2,1), imagesc(ConfMatSimp./correctones); colorbar; caxis([0 1])
+% set(gca,'XTickLabels',Activities)
+% set(gca,'YTickLabels',Activities)
+xlabel('Predicted Activities'); ylabel('True Activities');
+title('Severe to Severe')
+
+addtexttoConfMat(ConfMatSimp)
+
+% Accuracy, Severe to Severe
+subjinds=cellfun(@(x) ~isempty(x), ConfMat(:));
+subjinds=find(subjinds);
+for i=1:length(subjinds)
+    indSub=subjinds(i);
+    Acc_SevSev(i,:)=calc_classacc(ConfMat{indSub});
+end
+
+% Confusion Matrix, Mild to Severe
+load('ConfusionMat_Sev_Mild.mat')
+
+ConfMatAll=nansum(ConfMatAll,3);
+ConfMatSimp(1,1)=nansum(nansum(ConfMatAll(actSed,actSed)));
+ConfMatSimp(1,2)=nansum(nansum(ConfMatAll(actSed,actAmb)));
+ConfMatSimp(2,1)=nansum(nansum(ConfMatAll(actAmb,actSed)));
+ConfMatSimp(2,2)=nansum(nansum(ConfMatAll(actAmb,actAmb)));
+correctones = sum(ConfMatSimp,2);
+correctones = repmat(correctones,[1 2]);
+subplot(2,2,2), imagesc(ConfMatSimp./correctones); colorbar; caxis([0 1])
+% set(gca,'XTickLabels',Activities)
+% set(gca,'YTickLabels',Activities)
+xlabel('Predicted Activities'); ylabel('True Activities');
+title('Mild to Severe')
+
+addtexttoConfMat(ConfMatSimp)
+
+% Accuracy, Severe to Mild
+subjinds=cellfun(@(x) ~isempty(x), ConfMat(:));
+subjinds=find(subjinds);
+for i=1:length(subjinds)
+    indSub=subjinds(i);
+    Acc_SevMild(i,:)=calc_classacc(ConfMat{indSub});
+end
+
+% Box plots
+%BalAcc_SevSev=nanmean(Acc_SevSev,2);
+BalAcc_SevSev_Sed=nanmean(Acc_SevSev(:,1:3),2);
+BalAcc_SevSev_Amb=nanmean(Acc_SevSev(:,4:6),2);
+%BalAcc_SevMild=nanmean(Acc_SevMild,2);
+BalAcc_SevMild_Sed=nanmean(Acc_SevMild(:,1:3),2);
+BalAcc_SevMild_Amb=nanmean(Acc_SevMild(:,4:6),2);
+
+subplot(2,2,3)
+boxplot([BalAcc_SevSev_Sed BalAcc_SevSev_Amb]);
+%boxplot([Acc_SevSev]);
+ylim([0 1.1]);
+title('Severe to Severe');
+
+subplot(2,2,4)
+boxplot([BalAcc_SevMild_Sed BalAcc_SevMild_Amb]);
+%boxplot([Acc_SevMild]);
+ylim([0 1.1]);
+title('Mild to Severe');
+
 %% Histograms of class distributions
 
 % Healthy and Stroke (Population)
