@@ -8,7 +8,11 @@ function [ F1 ] = calc_f1( ConfMat )
     for i=1:N
         precision(i)=ConfMat(i,i)/sum(ConfMat(:,i));
         recall(i)=ConfMat(i,i)/sum(ConfMat(i,:));
-        F1(i)=2*precision(i)*recall(i)/(precision(i)+recall(i));
+        if recall(i)==0
+            F1(i)=0;
+        else
+            F1(i)=2*precision(i)*recall(i)/(precision(i)+recall(i));
+        end
     end
 
 end
