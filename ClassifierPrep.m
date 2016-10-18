@@ -3,11 +3,11 @@
 clear all
 
 nTrees=200;
-nResample=2; % Set to more than 1 to balance classes for training and specify number of resamplings
+nResample=1; % Set to more than 1 to balance classes for training and specify number of resamplings
 TestBalance=0; % Test on imbalanced or balanced classes when resampling test set
 SemiBal=3; % Desired ratio of smallest class to largest
 rmvFeat=0;
-VarImp=1;
+VarImp=0;
 if VarImp
     OOB='on';
 else
