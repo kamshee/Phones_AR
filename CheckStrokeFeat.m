@@ -30,9 +30,6 @@ Subjs=[];
 HomeInds=[];
 
 for i=1:length(Train)
-    if ~Subjs_w_All(i)
-        continue
-    end
     Feat=[Feat; Train(i).Features];
     Label=[Label Train(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Train(i).ActivityLabel)])];
@@ -40,9 +37,6 @@ for i=1:length(Train)
 end
 
 for i=1:length(Test)
-    if ~Subjs_w_All(i)
-        continue
-    end
     Feat=[Feat; Test(i).Features];
     Label=[Label Test(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Test(i).ActivityLabel)])];
@@ -50,14 +44,11 @@ for i=1:length(Test)
 end
 
 for i=1:length(Home)
-    if ~Subjs_w_All(i)
-        continue
-    end
     Feat=[Feat; Home(i).Features];
     Label=[Label Home(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Home(i).ActivityLabel)])];
     HomeInds=[HomeInds ones(1,length(Home(i).ActivityLabel))];
 end
 
-RFModel=TreeBagger(nTrees, Feat(:, FeatInds), Label,'OOBVarImp','on');
+RFModel=TreeBagger(ntrees, Feat(:, FeatInds), Label,'OOBVarImp','on');
 err = RFModel.OOBPermutedVarDeltaError;

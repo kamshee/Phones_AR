@@ -175,7 +175,7 @@ end
 
 end
 %% Calculations to evaluate models
-for i=1:length(AllFeat) 
+for i=1:length(ConfMat) 
     ConfMatAll(:,:,i)=ConfMat{i};
 end
 

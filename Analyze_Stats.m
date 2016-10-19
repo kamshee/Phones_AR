@@ -111,12 +111,24 @@ PopStats.Average=Pop_Stats(:,8);
 
 %% Gait impairment 
 
+strokeClass={'Mild','Mod','Sev'};
+strokeClass = [strokeClass; {[7 11 14 18 24 26 29 30],...
+    [1 8 10 12 13 15 16 19 20 21 22 25 28],...
+    [2 3 4 5 6 9 17 23 27]}];
+
 GI_Stats{1,1}='H->Mild F1';
 GI_Stats{2,1}='H->Mod F1';
 GI_Stats{3,1}='H->Sev F1';
 GI_Stats{4,1}='H->Mild Acc';
 GI_Stats{5,1}='H->Mod Acc';
 GI_Stats{6,1}='H->Sev Acc';
+
+GI_Stats{7,1}='S->Mild F1';
+GI_Stats{8,1}='S->Mod F1';
+GI_Stats{9,1}='S->Sev F1';
+GI_Stats{10,1}='S->Mild Acc';
+GI_Stats{11,1}='S->Mod Acc';
+GI_Stats{12,1}='S->Sev Acc';
 
 F1=[];
 Acc=[];
@@ -190,6 +202,77 @@ end
 
 for i=1:length(Activities)+1
     GI_Stats{6,i+1}=[num2str(Acc_stats(i,1),precision) ' +/- ' num2str(Acc_stats(i,2),precision) ...
+        ' (' num2str(Acc_stats(i,3),'%i') ')'];
+end
+
+% Stroke->GI groups
+
+F1=[];
+Acc=[];
+
+for i=1:length(Mild_inds)
+    F1(:,i)=calc_f1(PopConfMat{Mild_inds(i)});
+    Acc(:,i)=calc_classacc(PopConfMat{Mild_inds(i)});
+end
+
+F1_stats=[nanmean(F1,2) nanstd(F1,0,2) sum(~isnan(F1),2); ...
+    mean(mean(F1(:,all(~isnan(F1),1)))) std(mean(F1(:,all(~isnan(F1),1)))) sum(all(~isnan(F1),1))];
+Acc_stats=[nanmean(Acc,2) nanstd(Acc,0,2) sum(~isnan(Acc),2); ...
+    mean(mean(Acc(:,all(~isnan(Acc),1)))) std(mean(Acc(:,all(~isnan(Acc),1)))) sum(all(~isnan(Acc),1))];
+
+for i=1:length(Activities)+1
+    GI_Stats{7,i+1}=[num2str(F1_stats(i,1),precision) ' +/- ' num2str(F1_stats(i,2),precision) ...
+        ' (' num2str(F1_stats(i,3),'%i') ')'];
+end
+
+for i=1:length(Activities)+1
+    GI_Stats{10,i+1}=[num2str(Acc_stats(i,1),precision) ' +/- ' num2str(Acc_stats(i,2),precision) ...
+        ' (' num2str(Acc_stats(i,3),'%i') ')'];
+end
+
+F1=[];
+Acc=[];
+
+for i=1:length(Mod_inds)
+    F1(:,i)=calc_f1(PopConfMat{Mod_inds(i)});
+    Acc(:,i)=calc_classacc(PopConfMat{Mod_inds(i)});
+end
+
+F1_stats=[nanmean(F1,2) nanstd(F1,0,2) sum(~isnan(F1),2); ...
+    mean(mean(F1(:,all(~isnan(F1),1)))) std(mean(F1(:,all(~isnan(F1),1)))) sum(all(~isnan(F1),1))];
+Acc_stats=[nanmean(Acc,2) nanstd(Acc,0,2) sum(~isnan(Acc),2); ...
+    mean(mean(Acc(:,all(~isnan(Acc),1)))) std(mean(Acc(:,all(~isnan(Acc),1)))) sum(all(~isnan(Acc),1))];
+
+for i=1:length(Activities)+1
+    GI_Stats{8,i+1}=[num2str(F1_stats(i,1),precision) ' +/- ' num2str(F1_stats(i,2),precision) ...
+        ' (' num2str(F1_stats(i,3),'%i') ')'];
+end
+
+for i=1:length(Activities)+1
+    GI_Stats{11,i+1}=[num2str(Acc_stats(i,1),precision) ' +/- ' num2str(Acc_stats(i,2),precision) ...
+        ' (' num2str(Acc_stats(i,3),'%i') ')'];
+end
+
+F1=[];
+Acc=[];
+
+for i=1:length(Sev_inds)
+    F1(:,i)=calc_f1(PopConfMat{Sev_inds(i)});
+    Acc(:,i)=calc_classacc(PopConfMat{Sev_inds(i)});
+end
+
+F1_stats=[nanmean(F1,2) nanstd(F1,0,2) sum(~isnan(F1),2); ...
+    mean(mean(F1(:,all(~isnan(F1),1)))) std(mean(F1(:,all(~isnan(F1),1)))) sum(all(~isnan(F1),1))];
+Acc_stats=[nanmean(Acc,2) nanstd(Acc,0,2) sum(~isnan(Acc),2); ...
+    mean(mean(Acc(:,all(~isnan(Acc),1)))) std(mean(Acc(:,all(~isnan(Acc),1)))) sum(all(~isnan(Acc),1))];
+
+for i=1:length(Activities)+1
+    GI_Stats{9,i+1}=[num2str(F1_stats(i,1),precision) ' +/- ' num2str(F1_stats(i,2),precision) ...
+        ' (' num2str(F1_stats(i,3),'%i') ')'];
+end
+
+for i=1:length(Activities)+1
+    GI_Stats{12,i+1}=[num2str(Acc_stats(i,1),precision) ' +/- ' num2str(Acc_stats(i,2),precision) ...
         ' (' num2str(Acc_stats(i,3),'%i') ')'];
 end
 
