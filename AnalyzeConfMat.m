@@ -194,6 +194,7 @@ addtexttoConfMat(ConfMatAll)
 % Accuracy
 for indSub=1:length(PopConfMat)
     Acc_StrokePop(indSub,:)=calc_classacc(PopConfMat{indSub});
+    F1_StrokePop(indSub,:)=calc_f1(PopConfMat{indSub});
 end
 
 %% Healthy to Healthy
@@ -219,6 +220,7 @@ addtexttoConfMat(ConfMatAll)
 % Accuracy
 for indSub=1:length(ConfMat)
     Acc_Health(indSub,:)=calc_classacc(ConfMat{indSub});
+    F1_Health(indSub,:)=calc_f1(ConfMat{indSub});
 end
 
 % ActivityCounts
@@ -251,6 +253,7 @@ addtexttoConfMat(ConfMatAll)
 for i=1:30%length(subjinds)
     indSub=i;%subjinds(i);
     Acc_Stroke(i,:)=calc_classacc(ConfMat{indSub});
+    F1_Stroke(i,:)=calc_f1(ConfMat{indSub});
 end
 
 for i=1:size(ConfMat,2)
@@ -362,6 +365,7 @@ for indStroke=1:length(strokeSev)
     for i=1:length(subjinds)
         indSub=subjinds(i);
         eval(['Acc_' strokeSev{indStroke} '(i,:)=calc_classacc(ConfMat{indSub});']);
+        eval(['F1_' strokeSev{indStroke} '(i,:)=calc_f1(ConfMat{indSub});']);
     end
     
     eval(['BalAcc_' strokeSev{indStroke} '=nanmean(Acc_' strokeSev{indStroke} ',2);']);
@@ -490,6 +494,7 @@ for indStroke=1:length(strokeSev)
     for i=1:length(subjinds)
         indSub=subjinds(i);
         eval(['Acc_' strokeSev{indStroke} '(i,:)=calc_classacc(PopConfMat{indSub});']);
+        eval(['F1_' strokeSev{indStroke} '(i,:)=calc_f1(PopConfMat{indSub});']);
     end
     
     eval(['BalAcc_stroke' strokeSev{indStroke} '_Sed=nanmean(Acc_' strokeSev{indStroke} '(:,1:3),2);']);
