@@ -13,6 +13,9 @@ close all
 Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
 numAct=length(Activities);
 
+actSed=[1 2 3]; %indices of sedentary activities
+actAmb=[4 5 6]; %indices of ambulatory activities
+
 %load('Z:\RERC- Phones\Server Data\Clips\10s\PhoneData_Feat.mat') % Features
 
 %% Lab vs. Home
@@ -163,6 +166,18 @@ ConfMatAll=zeros(length(Activities),length(Activities),size(PopConfMat,2));
 % Confusion Matrix
 for i=1:size(PopConfMat,2)
     ConfMatAll(:,:,i)=PopConfMat{i}./repmat(sum(PopConfMat{i},2),[1 6]);
+    
+    ConfMatSimp(1,1)=nansum(nansum(PopConfMat{i}(actSed,actSed)));
+    ConfMatSimp(1,2)=nansum(nansum(PopConfMat{i}(actSed,actAmb)));
+    ConfMatSimp(2,1)=nansum(nansum(PopConfMat{i}(actAmb,actSed)));
+    ConfMatSimp(2,2)=nansum(nansum(PopConfMat{i}(actAmb,actAmb)));
+    correctones = sum(ConfMatSimp,2);
+    correctones = repmat(correctones,[1 2]);
+    class_perc=ConfMatSimp./correctones .*100;
+
+    % Misclassification (confusing Sed and Amb)
+    Misclass_Amb_Sed_StrokePop(i)=class_perc(2,1);
+    Misclass_Sed_Amb_StrokePop(i)=class_perc(1,2);
 end
 
 ConfMatAll=nansum(ConfMatAll,3);
@@ -180,7 +195,6 @@ addtexttoConfMat(ConfMatAll)
 for indSub=1:length(PopConfMat)
     Acc_StrokePop(indSub,:)=calc_classacc(PopConfMat{indSub});
 end
-
 
 %% Healthy to Healthy
 
@@ -240,6 +254,18 @@ for i=1:30%length(subjinds)
 end
 
 for i=1:size(ConfMat,2)
+    ConfMatSimp(1,1)=nansum(nansum(ConfMat{i}(actSed,actSed)));
+    ConfMatSimp(1,2)=nansum(nansum(ConfMat{i}(actSed,actAmb)));
+    ConfMatSimp(2,1)=nansum(nansum(ConfMat{i}(actAmb,actSed)));
+    ConfMatSimp(2,2)=nansum(nansum(ConfMat{i}(actAmb,actAmb)));
+    correctones = sum(ConfMatSimp,2);
+    correctones = repmat(correctones,[1 2]);
+    class_perc=ConfMatSimp./correctones .*100;
+
+    % Misclassification (confusing Sed and Amb)
+    Misclass_Amb_Sed_HealthStroke(i)=class_perc(2,1);
+    Misclass_Sed_Amb_HealthStroke(i)=class_perc(1,2);
+        
     ConfMatAll(:,:,i)=ConfMat{i};
 end
 StrokeCounts=sum(sum(ConfMatAll,3),2);
@@ -289,9 +315,12 @@ title('Stroke to Stroke');
 % set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
 % print(h,'Fig3','-dpdf','-r0')
 
-%% Healthy to Stroke by stroke severity
+%% Healthy to Stroke by gait impairment
 
 strokeSev={'Mild','Mod','Sev'};
+
+actSed=[1 2 3]; %indices of sedentary activities
+actAmb=[4 5 6]; %indices of ambulatory activities
 
 figure;
 for indStroke=1:length(strokeSev)
@@ -309,6 +338,24 @@ for indStroke=1:length(strokeSev)
     
     addtexttoConfMat(ConfMatAll)
     
+    % Percent misclassified
+    subjinds=cellfun(@(x) ~isempty(x), ConfMat(:));
+    subjinds=find(subjinds);
+    for i=1:length(subjinds)
+        indSub=subjinds(i);
+        ConfMatSimp(1,1)=nansum(nansum(ConfMat{indSub}(actSed,actSed)));
+        ConfMatSimp(1,2)=nansum(nansum(ConfMat{indSub}(actSed,actAmb)));
+        ConfMatSimp(2,1)=nansum(nansum(ConfMat{indSub}(actAmb,actSed)));
+        ConfMatSimp(2,2)=nansum(nansum(ConfMat{indSub}(actAmb,actAmb)));
+        correctones = sum(ConfMatSimp,2);
+        correctones = repmat(correctones,[1 2]);
+        class_perc=ConfMatSimp./correctones .*100;
+        
+        % Misclassification (confusing Sed and Amb)
+        eval(['Misclass_Amb_Sed_' strokeSev{indStroke} '(i)=class_perc(2,1);']);
+        eval(['Misclass_Sed_Amb_' strokeSev{indStroke} '(i)=class_perc(1,2);']);
+    end
+    
     % Accuracy
     subjinds=cellfun(@(x) ~isempty(x), ConfMat(:));
     subjinds=find(subjinds);
@@ -317,6 +364,7 @@ for indStroke=1:length(strokeSev)
         eval(['Acc_' strokeSev{indStroke} '(i,:)=calc_classacc(ConfMat{indSub});']);
     end
     
+    eval(['BalAcc_' strokeSev{indStroke} '=nanmean(Acc_' strokeSev{indStroke} ',2);']);
     eval(['BalAcc_' strokeSev{indStroke} '_Sed=nanmean(Acc_' strokeSev{indStroke} '(:,1:3),2);']);
     eval(['BalAcc_' strokeSev{indStroke} '_Amb=nanmean(Acc_' strokeSev{indStroke} '(:,4:6),2);']);
     
@@ -325,6 +373,173 @@ for indStroke=1:length(strokeSev)
     ylim([0 1.1]);
     title(['Healthy to ' strokeSev{indStroke}]);
 end
+
+% Correlation: velocity in TMWT and balanced accuracy for each subject
+V_tmwt=[0.5560,0.3318,0.1676,0.2760,0.2259,0.2345,1.0260,0.4050,0.3850,0.6389,...
+    1.5800,0.6700,0.4760,0.9710,0.7037,0.6805,0.3275,0.9000,0.4480,0.5450,...
+    0.7250,0.7310,0.3170,1.0010,0.6630,0.8930,0.3630,0.612,0.8557,0.8112];
+
+V_Mild=V_tmwt(V_tmwt>0.8);
+V_Mod=V_tmwt(V_tmwt>=0.4 & V_tmwt<=0.8);
+V_Sev=V_tmwt(V_tmwt<0.4);
+
+figure; 
+subplot(2,2,1); hold on;
+plot(V_Mild,nanmean(Acc_Mild(:,actAmb)*100,2),'go')
+plot(V_Mod,nanmean(Acc_Mod(:,actAmb)*100,2),'yo')
+plot(V_Sev,nanmean(Acc_Sev(:,actAmb)*100,2),'ro')
+xlabel('Walking speed (m/s)'); ylabel('Mean Recall (Amb)');
+axis([0 1.7 0 100])
+[R,P,RL,RU]=corrcoef([V_Mild V_Mod V_Sev]',[nanmean(Acc_Mild(:,actAmb),2); nanmean(Acc_Mod(:,actAmb),2); nanmean(Acc_Sev(:,actAmb),2)],'rows','complete');
+fprintf('Corr walking speed to mean Amb recall: r=%5.3f , p=%3.2e \n\n', R(1,2),P(1,2));
+
+subplot(2,2,2); hold on;
+plot(V_Mild,Misclass_Amb_Sed_Mild,'go')
+plot(V_Mod,Misclass_Amb_Sed_Mod,'yo')
+plot(V_Sev,Misclass_Amb_Sed_Sev,'ro')
+xlabel('Walking speed (m/s)'); ylabel('Percent misclassified (Amb as Sed)');
+axis([0 1.7 0 100])
+[R,P,RL,RU]=corrcoef([V_Mild V_Mod V_Sev]',[Misclass_Amb_Sed_Mild Misclass_Amb_Sed_Mod Misclass_Amb_Sed_Sev]','rows','complete');
+fprintf('Corr walking speed to Amb->Sed misclass: r=%5.3f , p=%3.2e \n\n', R(1,2),P(1,2));
+
+subplot(2,2,3); hold on;
+plot(V_Mild,nanmean(Acc_Mild(:,actSed),2),'gx')
+plot(V_Mod,nanmean(Acc_Mod(:,actSed),2),'bx')
+plot(V_Sev,nanmean(Acc_Sev(:,actSed),2),'rx')
+xlabel('Walking speed (m/s)'); ylabel('Mean Recall (Sed)');
+[R,P,RL,RU]=corrcoef([V_Mild V_Mod V_Sev]',[nanmean(Acc_Mild(:,actSed),2); nanmean(Acc_Mod(:,actSed),2); nanmean(Acc_Sev(:,actSed),2)],'rows','complete');
+fprintf('Corr walking speed to mean Sed recall: r=%5.3f , p=%3.2e \n\n', R(1,2),P(1,2));
+
+subplot(2,2,4); hold on;
+plot(V_Mild,Misclass_Sed_Amb_Mild,'gx')
+plot(V_Mod,Misclass_Sed_Amb_Mod,'bx')
+plot(V_Sev,Misclass_Sed_Amb_Sev,'rx')
+xlabel('Walking speed (m/s)'); ylabel('Percent misclassified (Sed as Amb)');
+[R,P,RL,RU]=corrcoef([V_Mild V_Mod V_Sev]',[Misclass_Sed_Amb_Mild Misclass_Sed_Amb_Mod Misclass_Sed_Amb_Sev]','rows','complete');
+fprintf('Corr walking speed to Sed->Amb misclass: r=%5.3f , p=%3.2e \n\n', R(1,2),P(1,2));
+
+
+% Stats
+whichmdl={'Mild_Amb','Mod_Amb','Sev_Amb'};
+%whichmdl={'Mild_Sed','Mod_Sed','Sev_Sed'};
+%whichmdl={'Mild','Mod','Sev','StrokePop','Stroke'};
+
+Recall=[]; Mdl={};
+indStats=1;
+for i=1:length(whichmdl)
+    eval(['thismdl = BalAcc_' whichmdl{i} ';']);
+    Recall = [Recall; thismdl];
+    Mdl(indStats:indStats+length(thismdl)-1)=whichmdl(i);
+    indStats=indStats+length(thismdl);
+end
+Mdl=Mdl';
+fprintf('\n STATS: Gait impairment using Healthy training data \n')
+figure;
+fprintf('  Anova: \n'); [p,t,stats] = anova1(Recall,Mdl,'off')
+fprintf('  Tukey post-hoc: \n'); [c,m,h,nms] = multcompare(stats)
+[nms num2cell(m)]
+
+%% Stroke to Stroke by gait impairment
+strokeSev={'Mild','Mod','Sev'};
+
+% Mild, Moderate, Severe stroke subjects
+strokeClass = [strokeSev; {[7 11 14 18 24 26 29 30],...
+    [1 8 10 12 13 15 16 19 20 21 22 25 28],...
+    [2 3 4 5 6 9 17 23 27]}];
+
+actSed=[1 2 3]; %indices of sedentary activities
+actAmb=[4 5 6]; %indices of ambulatory activities
+
+figure;
+for indStroke=1:length(strokeSev)
+    subjinds=strokeClass{2,indStroke};
+    for i=1:length(subjinds)
+        indSub=subjinds(i);
+        ConfMatAll(:,:,i)=PopConfMat{indSub}./repmat(sum(PopConfMat{indSub},2),[1 6]);
+    end
+    
+    % Confusion Matrix
+    ConfMatAll=nansum(ConfMatAll,3);
+    correctones = sum(ConfMatAll,2);
+    correctones = repmat(correctones,[1 6]);
+    subplot(2,3,indStroke), imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
+    set(gca,'XTickLabels',Activities)
+    set(gca,'YTickLabels',Activities)
+    xlabel('Predicted Activities'); ylabel('True Activities');
+    title(['Stroke to Stroke ' strokeSev{indStroke}])
+    
+    addtexttoConfMat(ConfMatAll)
+    
+    % Percent misclassified
+    for i=1:length(subjinds)
+        indSub=subjinds(i);
+        ConfMatSimp(1,1)=nansum(nansum(PopConfMat{indSub}(actSed,actSed)));
+        ConfMatSimp(1,2)=nansum(nansum(PopConfMat{indSub}(actSed,actAmb)));
+        ConfMatSimp(2,1)=nansum(nansum(PopConfMat{indSub}(actAmb,actSed)));
+        ConfMatSimp(2,2)=nansum(nansum(PopConfMat{indSub}(actAmb,actAmb)));
+        correctones = sum(ConfMatSimp,2);
+        correctones = repmat(correctones,[1 2]);
+        class_perc=ConfMatSimp./correctones .*100;
+        
+        % Misclassification (confusing Sed and Amb)
+        eval(['Misclass_Amb_Sed_' strokeSev{indStroke} '(i)=class_perc(2,1);']);
+        eval(['Misclass_Sed_Amb_' strokeSev{indStroke} '(i)=class_perc(1,2);']);
+    end
+    
+    % Accuracy;
+    for i=1:length(subjinds)
+        indSub=subjinds(i);
+        eval(['Acc_' strokeSev{indStroke} '(i,:)=calc_classacc(PopConfMat{indSub});']);
+    end
+    
+    eval(['BalAcc_stroke' strokeSev{indStroke} '_Sed=nanmean(Acc_' strokeSev{indStroke} '(:,1:3),2);']);
+    eval(['BalAcc_stroke' strokeSev{indStroke} '_Amb=nanmean(Acc_' strokeSev{indStroke} '(:,4:6),2);']);
+    eval(['BalAcc_stroke' strokeSev{indStroke} '=nanmean(Acc_' strokeSev{indStroke} ',2);']);
+    
+%     % Split boxplots by Sed and Amb
+%     subplot(2,3,3+indStroke)
+%     eval(['boxplot([BalAcc_stroke' strokeSev{indStroke} '_Sed BalAcc_stroke' strokeSev{indStroke} '_Amb]);']);
+%     ylim([0 1.1]);
+%     title(['Stroke to ' strokeSev{indStroke}]);
+end
+
+subplot(2,3,4)
+g=[1*ones(length(strokeClass{2,1}),1); ...
+   2*ones(length(strokeClass{2,2}),1); ...
+   3*ones(length(strokeClass{2,3}),1); ...
+   4*ones(length(BalAcc_StrokePop),1); ...
+   5*ones(length(BalAcc_Stroke),1)];
+boxplot([BalAcc_strokeMild; BalAcc_strokeMod; BalAcc_strokeSev; BalAcc_StrokePop; BalAcc_Stroke]*100,g);
+ylim([0 110]); ylabel('Mean Recall');
+
+subplot(2,3,5)
+g=[1*ones(length(strokeClass{2,1}),1); ...
+   2*ones(length(strokeClass{2,2}),1); ...
+   3*ones(length(strokeClass{2,3}),1); ...
+   4*ones(length(BalAcc_StrokePop),1); ...
+   5*ones(length(BalAcc_Stroke),1)];
+boxplot([Misclass_Amb_Sed_Mild Misclass_Amb_Sed_Mod Misclass_Amb_Sed_Sev Misclass_Amb_Sed_StrokePop Misclass_Amb_Sed_HealthStroke]',g);
+ylim([0 110]); ylabel('Avg Misclass (Amb->Sed)');
+
+
+% Stats
+whichmdl={'strokeMild_Amb','strokeMod_Amb','strokeSev_Amb'};
+%whichmdl={'strokeMild','strokeMod','strokeSev','StrokePop','Stroke'};
+
+Recall=[]; Mdl={};
+indStats=1;
+for i=1:length(whichmdl)
+    eval(['thismdl = BalAcc_' whichmdl{i} ';']);
+    Recall = [Recall; thismdl];
+    Mdl(indStats:indStats+length(thismdl)-1)=whichmdl(i);
+    indStats=indStats+length(thismdl);
+end
+Mdl=Mdl';
+fprintf('\n STATS: Gait impairment using Stroke training data \n')
+figure;
+fprintf('  Anova: \n'); [p,t,stats] = anova1(Recall,Mdl,'off')
+fprintf('  Tukey post-hoc: \n'); [c,m,h,nms] = multcompare(stats)
+[nms num2cell(m)]
 
 %% Severe to other stroke severity
 figure;
