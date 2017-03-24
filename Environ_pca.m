@@ -5,6 +5,8 @@ close all
 Act_Stat = {'Lying','Sitting','Standing'};
 Act_Amb = {'Walking','Stairs Up','Stairs Down'};
 
+Env = {'Lab1','Lab2','Home'};
+
 rmvFeat=1;
 if rmvFeat
     load NormImp
@@ -18,7 +20,19 @@ Lab1 = vertcat(AllFeat.Features);
 Lab1 = Lab1(:,FeatInds);
 ind_Lab1.All = 1:length(Lab1);
 
+% Activity Vector
 FeatAct.Lab1 = horzcat(AllFeat.ActivityLabel);
+
+% Subject Vector
+idx1=1;
+for indSub=1:length(AllFeat)
+    idx2=idx1+length(AllFeat(indSub).ActivityLabel)-1;
+    if idx2<idx1
+        continue
+    end
+    FeatSub.Lab1(idx1:idx2) = indSub;
+    idx1=idx2+1;
+end
 
 % Stationary vs. Ambulatory
 isStat.Lab1 = ismember(FeatAct.Lab1,Act_Stat)';
@@ -38,7 +52,19 @@ Lab2=vertcat(AllFeat.Features);
 Lab2 = Lab2(:,FeatInds);
 ind_Lab2.All = ind_Lab1.All(end)+1:ind_Lab1.All(end)+length(Lab2);
 
+% Activity Vector
 FeatAct.Lab2 = horzcat(AllFeat.ActivityLabel);
+
+% Subject Vector
+idx1=1;
+for indSub=1:length(AllFeat)
+    idx2=idx1+length(AllFeat(indSub).ActivityLabel)-1;
+    if idx2<idx1
+        continue
+    end
+    FeatSub.Lab2(idx1:idx2) = indSub;
+    idx1=idx2+1;
+end
 
 % Stationary vs. Ambulatory
 isStat.Lab2 = ismember(FeatAct.Lab2,Act_Stat)';
@@ -57,9 +83,19 @@ Home=vertcat(AllFeat.Features);
 Home = Home(:,FeatInds);
 ind_Home.All = ind_Lab2.All(end)+1:ind_Lab2.All(end)+length(Home);
 
+% Activity Vector
 FeatAct.Home = horzcat(AllFeat.ActivityLabel);
-for indSub=1:
-FeatSub.Home = horzcat(AllFeat.
+
+% Subject Vector
+idx1=1;
+for indSub=1:length(AllFeat)
+    idx2=idx1+length(AllFeat(indSub).ActivityLabel)-1;
+    if idx2<idx1
+        continue
+    end
+    FeatSub.Home(idx1:idx2) = indSub;
+    idx1=idx2+1;
+end
 
 % Stationary vs. Ambulatory
 isStat.Home = ismember(horzcat(AllFeat.ActivityLabel),Act_Stat)';
@@ -163,6 +199,21 @@ title('Ambulatory (3-D)')
 [coeff.Standing,score.Standing,latent.Standing,tsquared.Standing,explained.Standing,mu.Standing] = pca(zscore(AllEnv_Standing));
 [coeff.Walking,score.Walking,latent.Walking,tsquared.Walking,explained.Walking,mu.Walking] = pca(zscore(AllEnv_Walking));
 [coeff.Stairs,score.Stairs,latent.Stairs,tsquared.Stairs,explained.Stairs,mu.Stairs] = pca(zscore(AllEnv_Stairs));
+
+% Subject means
+
+% ***** Need to turn into cell array
+score.bySub.Lying=NaN*zeros(length(AllFeat),length(Env),2);
+for indSub=1:length(AllFeat)
+
+    for indEnv=1:length(Env)
+        eval(['A=FeatSub.' Env{indEnv} '(isLying.' Env{indEnv} ');']);
+        if ismember(indSub,A)
+            score.bySub.Lying(indSub,indEnv,1)=score.Lying(A==indSub,1);
+            score.bySub.Lying(indSub,indEnv,2)=score.Lying(A==indSub,2);
+        end
+    end
+end
 
 figure;
 
