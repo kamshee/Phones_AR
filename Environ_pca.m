@@ -4,6 +4,7 @@ close all
 
 Act_Stat = {'Lying','Sitting','Standing'};
 Act_Amb = {'Walking','Stairs Up','Stairs Down'};
+Act_All = {'Lying','Sitting','Standing','Walking','Stairs'};
 
 Env = {'Lab1','Lab2','Home'};
 
@@ -201,57 +202,116 @@ title('Ambulatory (3-D)')
 [coeff.Stairs,score.Stairs,latent.Stairs,tsquared.Stairs,explained.Stairs,mu.Stairs] = pca(zscore(AllEnv_Stairs));
 
 % Subject means
-
-% ***** Need to turn into cell array
-score.bySub.Lying=NaN*zeros(length(AllFeat),length(Env),2);
-for indSub=1:length(AllFeat)
-
-    for indEnv=1:length(Env)
-        eval(['A=FeatSub.' Env{indEnv} '(isLying.' Env{indEnv} ');']);
-        if ismember(indSub,A)
-            score.bySub.Lying(indSub,indEnv,1)=score.Lying(A==indSub,1);
-            score.bySub.Lying(indSub,indEnv,2)=score.Lying(A==indSub,2);
+for indAct=1:length(Act_All)
+    % Initialize
+    eval(['score.bySub.' Act_All{indAct} '=cell(length(AllFeat),length(Env),2);']);  % Each value (cell)
+    eval(['score.bySub.' Act_All{indAct} 'mean=NaN*ones(length(AllFeat),length(Env),2);']);  % Mean (matrix)
+    eval(['score.bySub.' Act_All{indAct} 'std=NaN*ones(length(AllFeat),length(Env),2);']);   % Std dev (matrix)
+    
+    for indSub=1:length(AllFeat)
+        for indEnv=1:length(Env)
+            eval(['A=FeatSub.' Env{indEnv} '(is' Act_All{indAct} '.' Env{indEnv} ');']);
+            if ismember(indSub,A)
+                % Values
+                eval(['score.bySub.' Act_All{indAct} '{indSub,indEnv,1}=score.' Act_All{indAct} '(A==indSub,1);']);
+                eval(['score.bySub.' Act_All{indAct} '{indSub,indEnv,2}=score.' Act_All{indAct} '(A==indSub,2);']);
+                
+                % Mean
+                eval(['score.bySub.' Act_All{indAct} 'mean(indSub,indEnv,1)=mean( score.' Act_All{indAct} '(A==indSub,1) );']);
+                eval(['score.bySub.' Act_All{indAct} 'mean(indSub,indEnv,2)=mean( score.' Act_All{indAct} '(A==indSub,2) );']);
+                
+                % Std
+                eval(['score.bySub.' Act_All{indAct} 'std(indSub,indEnv,1)=std( score.' Act_All{indAct} '(A==indSub,1) );']);
+                eval(['score.bySub.' Act_All{indAct} 'std(indSub,indEnv,2)=std( score.' Act_All{indAct} '(A==indSub,2) );']);
+            end
         end
     end
 end
 
+%% Plot PCA: Activities, Each value
 figure;
 
-subplot(2,3,1); hold on;
-plot(score.Lying(ind_Lab1.Lying,1),score.Lying(ind_Lab1.Lying,2),'k+');
-plot(score.Lying(ind_Lab2.Lying,1),score.Lying(ind_Lab2.Lying,2),'b+');
-plot(score.Lying(ind_Home.Lying,1),score.Lying(ind_Home.Lying,2),'r+')
-legend('Lab1','Lab2','Home')
-xlabel('Component 1'); ylabel('Component 2');
-title('Lying')
+% Lying
+subplot(2,3,1); title('Lying')
+    hold on;
+    plot(score.Lying(ind_Lab1.Lying,1),score.Lying(ind_Lab1.Lying,2),'k+');
+    plot(score.Lying(ind_Lab2.Lying,1),score.Lying(ind_Lab2.Lying,2),'b+');
+    plot(score.Lying(ind_Home.Lying,1),score.Lying(ind_Home.Lying,2),'r+')
+    xlabel('Component 1'); ylabel('Component 2');
+    legend('Lab1','Lab2','Home')
 
-subplot(2,3,2); hold on;
-plot(score.Sitting(ind_Lab1.Sitting,1),score.Sitting(ind_Lab1.Sitting,2),'k+');
-plot(score.Sitting(ind_Lab2.Sitting,1),score.Sitting(ind_Lab2.Sitting,2),'b+');
-plot(score.Sitting(ind_Home.Sitting,1),score.Sitting(ind_Home.Sitting,2),'r+')
-xlabel('Component 1'); ylabel('Component 2');
-title('Sitting')
+% Sitting
+subplot(2,3,2); title('Sitting');
+    hold on;
+    plot(score.Sitting(ind_Lab1.Sitting,1),score.Sitting(ind_Lab1.Sitting,2),'k+');
+    plot(score.Sitting(ind_Lab2.Sitting,1),score.Sitting(ind_Lab2.Sitting,2),'b+');
+    plot(score.Sitting(ind_Home.Sitting,1),score.Sitting(ind_Home.Sitting,2),'r+')
+    xlabel('Component 1'); ylabel('Component 2');
 
-subplot(2,3,3); hold on;
-plot(score.Standing(ind_Lab1.Standing,1),score.Standing(ind_Lab1.Standing,2),'k+');
-plot(score.Standing(ind_Lab2.Standing,1),score.Standing(ind_Lab2.Standing,2),'b+');
-plot(score.Standing(ind_Home.Standing,1),score.Standing(ind_Home.Standing,2),'r+')
-xlabel('Component 1'); ylabel('Component 2');
-title('Standing')
+% Standing
+subplot(2,3,3); title('Standing')
+    hold on;
+    plot(score.Standing(ind_Lab1.Standing,1),score.Standing(ind_Lab1.Standing,2),'k+');
+    plot(score.Standing(ind_Lab2.Standing,1),score.Standing(ind_Lab2.Standing,2),'b+');
+    plot(score.Standing(ind_Home.Standing,1),score.Standing(ind_Home.Standing,2),'r+')
+    xlabel('Component 1'); ylabel('Component 2');
 
-subplot(2,3,4); hold on;
-plot(score.Walking(ind_Lab1.Walking,1),score.Walking(ind_Lab1.Walking,2),'k+');
-plot(score.Walking(ind_Lab2.Walking,1),score.Walking(ind_Lab2.Walking,2),'b+');
-plot(score.Walking(ind_Home.Walking,1),score.Walking(ind_Home.Walking,2),'r+')
-xlabel('Component 1'); ylabel('Component 2');
-title('Walking')
+% Walking
+subplot(2,3,4); title('Walking')
+    hold on;
+    plot(score.Walking(ind_Lab1.Walking,1),score.Walking(ind_Lab1.Walking,2),'k+');
+    plot(score.Walking(ind_Lab2.Walking,1),score.Walking(ind_Lab2.Walking,2),'b+');
+    plot(score.Walking(ind_Home.Walking,1),score.Walking(ind_Home.Walking,2),'r+')
+    xlabel('Component 1'); ylabel('Component 2');
 
-subplot(2,3,5); hold on;
-plot(score.Stairs(ind_Lab1.Stairs,1),score.Stairs(ind_Lab1.Stairs,2),'k+');
-plot(score.Stairs(ind_Lab2.Stairs,1),score.Stairs(ind_Lab2.Stairs,2),'b+');
-plot(score.Stairs(ind_Home.Stairs,1),score.Stairs(ind_Home.Stairs,2),'r+')
-xlabel('Component 1'); ylabel('Component 2');
-title('Stairs')
+% Stairs
+subplot(2,3,5); title('Stairs')
+    hold on;
+    plot(score.Stairs(ind_Lab1.Stairs,1),score.Stairs(ind_Lab1.Stairs,2),'k+');
+    plot(score.Stairs(ind_Lab2.Stairs,1),score.Stairs(ind_Lab2.Stairs,2),'b+');
+    plot(score.Stairs(ind_Home.Stairs,1),score.Stairs(ind_Home.Stairs,2),'r+')
+    xlabel('Component 1'); ylabel('Component 2');
+    
+figure;
+
+% Lying
+subplot(2,3,1); title('Lying')
+    hold on;
+    plot(score.bySub.Lyingmean(:,1,1),score.bySub.Lyingmean(:,1,2),'ks','MarkerFaceColor','k','MarkerSize',8)
+    plot(score.bySub.Lyingmean(:,2,1),score.bySub.Lyingmean(:,2,2),'bs','MarkerFaceColor','b','MarkerSize',8)
+    plot(score.bySub.Lyingmean(:,3,1),score.bySub.Lyingmean(:,3,2),'rs','MarkerFaceColor','r','MarkerSize',8)
+    legend('Lab1','Lab2','Home')
+
+subplot(2,3,2); title('Sitting');
+    hold on;
+    plot(score.Sitting(ind_Lab1.Sitting,1),score.Sitting(ind_Lab1.Sitting,2),'k+');
+    plot(score.Sitting(ind_Lab2.Sitting,1),score.Sitting(ind_Lab2.Sitting,2),'b+');
+    plot(score.Sitting(ind_Home.Sitting,1),score.Sitting(ind_Home.Sitting,2),'r+')
+    xlabel('Component 1'); ylabel('Component 2');
+
+% Stadning
+subplot(2,3,3); title('Standing')
+    hold on;
+    plot(score.Standing(ind_Lab1.Standing,1),score.Standing(ind_Lab1.Standing,2),'k+');
+    plot(score.Standing(ind_Lab2.Standing,1),score.Standing(ind_Lab2.Standing,2),'b+');
+    plot(score.Standing(ind_Home.Standing,1),score.Standing(ind_Home.Standing,2),'r+')
+    xlabel('Component 1'); ylabel('Component 2');
+
+% Walking
+subplot(2,3,4); title('Walking')
+    hold on;
+    plot(score.Walking(ind_Lab1.Walking,1),score.Walking(ind_Lab1.Walking,2),'k+');
+    plot(score.Walking(ind_Lab2.Walking,1),score.Walking(ind_Lab2.Walking,2),'b+');
+    plot(score.Walking(ind_Home.Walking,1),score.Walking(ind_Home.Walking,2),'r+')
+    xlabel('Component 1'); ylabel('Component 2');
+
+% Stairs
+subplot(2,3,5); title('Stairs')
+    hold on;
+    plot(score.Stairs(ind_Lab1.Stairs,1),score.Stairs(ind_Lab1.Stairs,2),'k+');
+    plot(score.Stairs(ind_Lab2.Stairs,1),score.Stairs(ind_Lab2.Stairs,2),'b+');
+    plot(score.Stairs(ind_Home.Stairs,1),score.Stairs(ind_Home.Stairs,2),'r+')
+    xlabel('Component 1'); ylabel('Component 2');
 
 %% PCA: All
 % [coeff,score,latent,tsquared,explained,mu] = pca(AllEnv);
