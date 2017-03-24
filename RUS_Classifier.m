@@ -7,8 +7,8 @@ ntrees=100;
 rmvFeat=1;
 if rmvFeat
     load NormImp
-%     FeatInds=find(norm_imp>.25);
-    FeatInds=find(norm_imp(1:end-8)>.25); % Run w/o barometer features
+    FeatInds=find(norm_imp>.25);
+%     FeatInds=find(norm_imp(1:end-8)>.25); % Run w/o barometer features
 else
     FeatInds=1:270;
 end
@@ -45,51 +45,59 @@ Acc=zeros(length(AllFeat),1);
 % ConfMat=zeros(numAct,numAct,length(AllFeat));
 ConfMat=cell(1,length(AllFeat));
 PredLabels=cell(1,length(AllFeat));
-for indSubj=1:length(AllFeat)
-% for indSubj=1:1
 
-    TrainInd=find(NewFeatures(:,1)~=indSubj);
-    FeatTrain=NewFeatures(TrainInd,FeatInds+1);
-    LabelTrain=NewLabels(TrainInd);
+% Determine effects of sample size
+for ssSubj=1:length(AllFeat)-1 % sample size of testing subjects
+    nRand=100;
+    [~, randSubjMat] = sort(rand(length(AllFeat),nRand)); % nRand columns for random permutations of all subjects
+    for indRand=1:nRand
 
-    TestInd=find(Features(:,1)==indSubj);
-    FeatTest=Features(TestInd,FeatInds+1);
-    LabelTest=Labels(TestInd);
+        for indSubj=randSubjMat(end-ssSubj+1:end,indRand)
+        % for indSubj=1:1
 
-    t = templateTree('MinLeafSize',1);
-    RFModel=fitensemble(FeatTrain,LabelTrain,'RUSBoost',ntrees,t,'LearnRate',1);
-    LabelsRF = predict(RFModel,FeatTest);
+            TrainInd=find(NewFeatures(:,1)~=indSubj);
+            FeatTrain=NewFeatures(TrainInd,FeatInds+1);
+            LabelTrain=NewLabels(TrainInd);
 
-    %figure; plot(loss(RFModel,FeatTest,LabelTest,'mode','cumulative'))
-    %savefig(['Features25/RUS_Subj_' num2str(indSubj) '.fig'])
+            TestInd=find(Features(:,1)==indSubj);
+            FeatTest=Features(TestInd,FeatInds+1);
+            LabelTest=Labels(TestInd);
 
-    TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
-    k(indSubj)=length(TPInd);
-    Acc(indSubj)=sum(TPInd)/k(indSubj);
+            t = templateTree('MinLeafSize',5);
+            RFModel=fitensemble(FeatTrain,LabelTrain,'RUSBoost',ntrees,t,'LearnRate',0.1);
+            LabelsRF = predict(RFModel,FeatTest);
 
-    ConfMat{indSubj}=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
-    PredLabels{indSubj}=LabelsRF;
+            %figure; plot(loss(RFModel,FeatTest,LabelTest,'mode','cumulative'))
+            %savefig(['Features25/RUS_Subj_' num2str(indSubj) '.fig'])
 
-    % Find missing classes and replace them
-    u=unique([LabelTest; LabelsRF]);
-    n_missing=zeros(1,6);
-    for uind=1:length(u)
-        n_missing(strcmp(u(uind),Activities))=1;
-    end
-    z_inds=find(~n_missing);
-    for m=z_inds
-        if m==1
-            ConfMat{indSubj}=[zeros(1,size(ConfMat{indSubj},2)); ConfMat{indSubj}(m:end,:)];
-            ConfMat{indSubj}=[zeros(size(ConfMat{indSubj},1),1) ConfMat{indSubj}(:,m:end)];
-        else
-            ConfMat{indSubj}=[ConfMat{indSubj}(1:m-1,:); zeros(1,size(ConfMat{indSubj},2)); ConfMat{indSubj}(m:end,:)];
-            ConfMat{indSubj}=[ConfMat{indSubj}(:,1:m-1) zeros(size(ConfMat{indSubj},1),1) ConfMat{indSubj}(:,m:end)];
-        end
-    end
+            TPInd=cellfun(@strcmp, LabelsRF, LabelTest);
+            k(indSubj)=length(TPInd);
+            Acc(indSubj)=sum(TPInd)/k(indSubj);
 
-end
+            ConfMat{indSubj}=confusionmat([Activities'; LabelTest], [Activities'; LabelsRF])-eye(6);
+            PredLabels{indSubj}=LabelsRF;
 
-save RUSConfusion_noBar.mat ConfMat
+            % Find missing classes and replace them
+            u=unique([LabelTest; LabelsRF]);
+            n_missing=zeros(1,6);
+            for uind=1:length(u)
+                n_missing(strcmp(u(uind),Activities))=1;
+            end
+            z_inds=find(~n_missing);
+            for m=z_inds
+                if m==1
+                    ConfMat{indSubj}=[zeros(1,size(ConfMat{indSubj},2)); ConfMat{indSubj}(m:end,:)];
+                    ConfMat{indSubj}=[zeros(size(ConfMat{indSubj},1),1) ConfMat{indSubj}(:,m:end)];
+                else
+                    ConfMat{indSubj}=[ConfMat{indSubj}(1:m-1,:); zeros(1,size(ConfMat{indSubj},2)); ConfMat{indSubj}(m:end,:)];
+                    ConfMat{indSubj}=[ConfMat{indSubj}(:,1:m-1) zeros(size(ConfMat{indSubj},1),1) ConfMat{indSubj}(:,m:end)];
+                end
+            end
+
+        end %indSubj
+    end %indRand
+end %ssSubj
+save RUSConfusion.mat ConfMat
 %% Calculations to evaluate models
 for i=1:size(ConfMat,3)
     ConfMatAll(:,:,i)=ConfMat{i};

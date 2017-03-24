@@ -11,6 +11,7 @@ close all
 % -------------------------------------------------------------------------
 
 Activities={'Sitting', 'Lying', 'Standing', 'Stairs Up', 'Stairs Down', 'Walking'};
+Act_order = [2 1 3 6 4 5];
 numAct=length(Activities);
 
 actSed=[1 2 3]; %indices of sedentary activities
@@ -23,7 +24,7 @@ load('ConfusionMat_strokestrokeHome');
 load('DirectComp_LabvsHome');
 
 Envir_Activities={'Sitting', 'Standing', 'Stair', 'Walking'};
-
+Act_order2=[1 2 4 3];
 % Confusion Matrix: Lab --> Home
 subjinds=cellfun(@(x) ~isempty(x), LabConfMatHome(:));
 ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),sum(subjinds),size(LabConfMatHome,2));
@@ -43,22 +44,12 @@ correctones = repmat(correctones,[1 length(Envir_Activities)]);
 figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke Lab to Stroke Home');
-set(gca,'XTickLabel',Activities)
-set(gca,'YTickLabel',Activities)
+set(gca,'XTickLabel',Envir_Activities)
+set(gca,'YTickLabel',Envir_Activities)
 set(gca,'XTick',1:length(Envir_Activities))
 set(gca,'YTick',1:length(Envir_Activities))
 
-for i=1:length(Envir_Activities)
-    for j=1:length(Envir_Activities)
-        conf_str=num2str(ConfMatAll(j,i));
-        if ConfMatAll(j,i)/correctones(j,i)<0.15
-            txtclr='w';
-        else
-            txtclr='k';
-        end
-        text(i-0.25,j,conf_str,'Color',txtclr);
-    end
-end
+addtexttoConfMat(ConfMatAll)
 
 % Confusion Matrix: Lab+Home --> Home 
 subjinds=cellfun(@(x) ~isempty(x), LabHomeConfMatHome(:,1));
@@ -86,22 +77,12 @@ correctones = repmat(correctones,[1 length(Envir_Activities)]);
 figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke Lab+Home to Stroke Home');
-set(gca,'XTickLabel',Activities)
-set(gca,'YTickLabel',Activities)
+set(gca,'XTickLabel',Envir_Activities)
+set(gca,'YTickLabel',Envir_Activities)
 set(gca,'XTick',1:length(Envir_Activities))
 set(gca,'YTick',1:length(Envir_Activities))
 
-for i=1:length(Envir_Activities)
-    for j=1:length(Envir_Activities)
-        conf_str=num2str(ConfMatAll(j,i));
-        if ConfMatAll(j,i)/correctones(j,i)<0.15
-            txtclr='w';
-        else
-            txtclr='k';
-        end
-        text(i-0.25,j,conf_str,'Color',txtclr);
-    end
-end
+addtexttoConfMat(ConfMatAll)
 
 
 subjinds=cellfun(@(x) ~isempty(x), LabHomeConfMatHome(:,1));
@@ -120,6 +101,40 @@ for i=1:length(subjinds)
     Acc_LabHomeHome(i,:)=calc_classacc(sum(LabHomeConfMatHome_sub,3));
 
 end
+
+% Confusion Matrix: Home --> Home
+subjinds=cellfun(@(x) ~isempty(x), HometoHome(:,1));
+ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),sum(subjinds),size(HometoHome,2));
+
+subjinds=find(subjinds);
+
+StrokeHomeCounts=zeros(length(Envir_Activities),15);
+for i=1:length(subjinds)
+    ind=subjinds(i);
+    for j=1:size(HometoHome,2)
+        ConfMatAll(:,:,ind,j)=HometoHome{ind,j}(Act_order2,Act_order2);
+        if j==1
+            StrokeHomeCounts(:,i)=sum(HometoHome{ind,j},2);
+        end
+    end
+end
+ConfMatAll=sum(ConfMatAll,4);
+
+subjs_w_All=all(sum(ConfMatAll,2),1);
+
+ConfMatAll=sum(ConfMatAll,3);
+correctones = sum(ConfMatAll,2);
+correctones = repmat(correctones,[1 length(Envir_Activities)]);
+figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
+xlabel('Predicted Activities'); ylabel('True Activities');
+title('Stroke Home to Stroke Home');
+set(gca,'XTickLabel',Envir_Activities(Act_order2))
+set(gca,'YTickLabel',Envir_Activities(Act_order2))
+set(gca,'XTick',1:length(Envir_Activities))
+set(gca,'YTick',1:length(Envir_Activities))
+
+addtexttoConfMat(ConfMatAll)
+
 
 % Box plots: Environment-specific
 figure;
@@ -181,11 +196,13 @@ for i=1:size(PopConfMat,2)
 end
 
 ConfMatAll=nansum(ConfMatAll,3);
+ConfMatAll=ConfMatAll(Act_order,Act_order);
+
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
 figure, subplot(2,3,3), imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
-set(gca,'XTickLabels',Activities)
-set(gca,'YTickLabels',Activities)
+set(gca,'XTickLabels',Activities(Act_order))
+set(gca,'YTickLabels',Activities(Act_order))
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Stroke to Stroke')
 
@@ -205,13 +222,14 @@ load('RUSConfusion');
 for i=1:size(ConfMat,2)
     ConfMatAll(:,:,i)=ConfMat{i}./repmat(sum(ConfMat{i},2),[1 6]);
 end
-
 ConfMatAll=nansum(ConfMatAll,3);
+ConfMatAll=ConfMatAll(Act_order,Act_order);
+
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
 subplot(2,3,1), imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
-set(gca,'XTickLabels',Activities)
-set(gca,'YTickLabels',Activities)
+set(gca,'XTickLabels',Activities(Act_order))
+set(gca,'YTickLabels',Activities(Act_order))
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Healthy to Healthy')
 
@@ -237,13 +255,14 @@ load('ConfusionMat_strokeAll.mat')
 for i=1:size(ConfMat,2)
     ConfMatAll(:,:,i)=ConfMat{i}./repmat(sum(ConfMat{i},2),[1 6]);
 end
-
 ConfMatAll=nansum(ConfMatAll,3);
+ConfMatAll=ConfMatAll(Act_order,Act_order);
+
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
 subplot(2,3,2), imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
-set(gca,'XTickLabels',Activities)
-set(gca,'YTickLabels',Activities)
+set(gca,'XTickLabels',Activities(Act_order))
+set(gca,'YTickLabels',Activities(Act_order))
 xlabel('Predicted Activities'); ylabel('True Activities');
 title('Healthy to Stroke')
 
@@ -328,14 +347,16 @@ actAmb=[4 5 6]; %indices of ambulatory activities
 figure;
 for indStroke=1:length(strokeSev)
     load(['ConfusionMat_strokeAll_' strokeSev{indStroke} '.mat'])
+    ConfMatAll = ConfMatAll(Act_order,Act_order);
+
 
     % Confusion Matrix
     ConfMatAll=nansum(ConfMatAll,3);
     correctones = sum(ConfMatAll,2);
     correctones = repmat(correctones,[1 6]);
     subplot(2,3,indStroke), imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
-    set(gca,'XTickLabels',Activities)
-    set(gca,'YTickLabels',Activities)
+    set(gca,'XTickLabels',Activities(Act_order))
+    set(gca,'YTickLabels',Activities(Act_order))
     xlabel('Predicted Activities'); ylabel('True Activities');
     title(['Healthy to Stroke ' strokeSev{indStroke}])
     
@@ -461,14 +482,15 @@ for indStroke=1:length(strokeSev)
         indSub=subjinds(i);
         ConfMatAll(:,:,i)=PopConfMat{indSub}./repmat(sum(PopConfMat{indSub},2),[1 6]);
     end
+    ConfMatAll = ConfMatAll(Act_order,Act_order);
     
     % Confusion Matrix
     ConfMatAll=nansum(ConfMatAll,3);
     correctones = sum(ConfMatAll,2);
     correctones = repmat(correctones,[1 6]);
     subplot(2,3,indStroke), imagesc(ConfMatAll./correctones); colorbar; caxis([0 1])
-    set(gca,'XTickLabels',Activities)
-    set(gca,'YTickLabels',Activities)
+    set(gca,'XTickLabels',Activities(Act_order))
+    set(gca,'YTickLabels',Activities(Act_order))
     xlabel('Predicted Activities'); ylabel('True Activities');
     title(['Stroke to Stroke ' strokeSev{indStroke}])
     
@@ -669,3 +691,186 @@ ax=gca;
 ax.XTick=ticks;
 ax.XTickLabel=ticklabels;
 ax.XTickLabelRotation=90;
+
+%% Envronmental models
+load('EnvironmentalModels');
+load('DirectComp_LabvsHome');
+
+Envir_Activities={'Sitting', 'Standing', 'Stair', 'Walking'};
+Act_order2=[1 2 4 3];
+
+actSed2=[1 2];
+actAmb2=[3 4];
+
+% Confusion Matrix: Lab 1 --> Lab 2 
+subjinds=cellfun(@(x) ~isempty(x), LabConfMatLab(:,1));
+ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),sum(subjinds),size(LabConfMatLab,2));
+
+subjinds=find(subjinds);
+
+LabLabCounts=zeros(length(Envir_Activities),15);
+for i=1:length(subjinds)
+    ind=subjinds(i);
+    for j=1:size(LabConfMatLab,2)
+        ConfMatAll(:,:,ind,j)=LabConfMatLab{ind,j}(Act_order2,Act_order2);
+        if j==1
+            LabLabCounts(:,i)=sum(LabConfMatLab{ind,j},2);
+        end
+    end
+end
+ConfMatAll=sum(ConfMatAll,4);
+subjs_w_All=all(sum(ConfMatAll,2),1);
+
+ConfMatAll=sum(ConfMatAll,3);
+correctones = sum(ConfMatAll,2);
+correctones = repmat(correctones,[1 length(Envir_Activities)]);
+figure; subplot(2,3,1); imagesc(ConfMatAll./correctones, [0 1]); colorbar
+xlabel('Predicted Activities'); ylabel('True Activities');
+title('Stroke Lab 1 to Stroke Lab 2');
+set(gca,'XTickLabel',Envir_Activities(Act_order2))
+set(gca,'YTickLabel',Envir_Activities(Act_order2))
+set(gca,'XTick',1:length(Envir_Activities))
+set(gca,'YTick',1:length(Envir_Activities))
+
+addtexttoConfMat(ConfMatAll)
+
+ConfMatSimp(1,1)=nansum(nansum(ConfMatAll(actSed2,actSed2)));
+ConfMatSimp(1,2)=nansum(nansum(ConfMatAll(actSed2,actAmb2)));
+ConfMatSimp(2,1)=nansum(nansum(ConfMatAll(actAmb2,actSed2)));
+ConfMatSimp(2,2)=nansum(nansum(ConfMatAll(actAmb2,actAmb2)));
+correctones = sum(ConfMatSimp,2);
+correctones = repmat(correctones,[1 2]);
+class_perc=ConfMatSimp./correctones .*100;
+
+% Misclassification (confusing Sed and Amb)
+Misclass_Amb_Sed_LabLab=class_perc(2,1);
+Misclass_Sed_Amb_LabLab=class_perc(1,2);
+
+% Confusion Matrix: Lab 1 --> Home 
+subjinds=cellfun(@(x) ~isempty(x), LabConfMatLab(:,1));
+ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),sum(subjinds),size(LabConfMatLab,2));
+
+subjinds=find(subjinds);
+
+LabHomeCounts=zeros(length(Envir_Activities),15);
+for i=1:length(subjinds)
+    ind=subjinds(i);
+    for j=1:size(LabConfMatHome,2)
+        ConfMatAll(:,:,ind,j)=LabConfMatHome{ind,j}(Act_order2,Act_order2);
+        if j==1
+            LabHomeCounts(:,i)=sum(LabConfMatHome{ind,j},2);
+        end
+    end
+end
+ConfMatAll=sum(ConfMatAll,4);
+subjs_w_All=all(sum(ConfMatAll,2),1);
+
+ConfMatAll=sum(ConfMatAll,3);
+correctones = sum(ConfMatAll,2);
+correctones = repmat(correctones,[1 length(Envir_Activities)]);
+subplot(2,3,2); imagesc(ConfMatAll./correctones, [0 1]); colorbar
+xlabel('Predicted Activities'); ylabel('True Activities');
+title('Stroke Lab 1 to Stroke Home');
+set(gca,'XTickLabel',Envir_Activities(Act_order2))
+set(gca,'YTickLabel',Envir_Activities(Act_order2))
+set(gca,'XTick',1:length(Envir_Activities))
+set(gca,'YTick',1:length(Envir_Activities))
+
+addtexttoConfMat(ConfMatAll)
+
+ConfMatSimp(1,1)=nansum(nansum(ConfMatAll(actSed2,actSed2)));
+ConfMatSimp(1,2)=nansum(nansum(ConfMatAll(actSed2,actAmb2)));
+ConfMatSimp(2,1)=nansum(nansum(ConfMatAll(actAmb2,actSed2)));
+ConfMatSimp(2,2)=nansum(nansum(ConfMatAll(actAmb2,actAmb2)));
+correctones = sum(ConfMatSimp,2);
+correctones = repmat(correctones,[1 2]);
+class_perc=ConfMatSimp./correctones .*100;
+
+% Misclassification (confusing Sed and Amb)
+Misclass_Amb_Sed_LabHome=class_perc(2,1);
+Misclass_Sed_Amb_LabHome=class_perc(1,2);
+
+
+% Confusion Matrix: Home --> Home
+subjinds=cellfun(@(x) ~isempty(x), HometoHome(:,1));
+ConfMatAll=zeros(length(Envir_Activities),length(Envir_Activities),sum(subjinds),size(HometoHome,2));
+
+subjinds=find(subjinds);
+
+StrokeHomeCounts=zeros(length(Envir_Activities),15);
+for i=1:length(subjinds)
+    ind=subjinds(i);
+    for j=1:size(HometoHome,2)
+        ConfMatAll(:,:,ind,j)=HometoHome{ind,j}(Act_order2,Act_order2);
+        if j==1
+            StrokeHomeCounts(:,i)=sum(HometoHome{ind,j},2);
+        end
+    end
+end
+ConfMatAll=sum(ConfMatAll,4);
+subjs_w_All=all(sum(ConfMatAll,2),1);
+
+ConfMatAll=sum(ConfMatAll,3);
+correctones = sum(ConfMatAll,2);
+correctones = repmat(correctones,[1 length(Envir_Activities)]);
+subplot(2,3,3); imagesc(ConfMatAll./correctones, [0 1]); colorbar
+xlabel('Predicted Activities'); ylabel('True Activities');
+title('Stroke Home to Stroke Home');
+set(gca,'XTickLabel',Envir_Activities(Act_order2))
+set(gca,'YTickLabel',Envir_Activities(Act_order2))
+set(gca,'XTick',1:length(Envir_Activities))
+set(gca,'YTick',1:length(Envir_Activities))
+
+addtexttoConfMat(ConfMatAll)
+
+ConfMatSimp(1,1)=nansum(nansum(ConfMatAll(actSed2,actSed2)));
+ConfMatSimp(1,2)=nansum(nansum(ConfMatAll(actSed2,actAmb2)));
+ConfMatSimp(2,1)=nansum(nansum(ConfMatAll(actAmb2,actSed2)));
+ConfMatSimp(2,2)=nansum(nansum(ConfMatAll(actAmb2,actAmb2)));
+correctones = sum(ConfMatSimp,2);
+correctones = repmat(correctones,[1 2]);
+class_perc=ConfMatSimp./correctones .*100;
+
+% Misclassification (confusing Sed and Amb)
+Misclass_Amb_Sed_HomeHome=class_perc(2,1);
+Misclass_Sed_Amb_HomeHome=class_perc(1,2);
+
+
+% Accuracy 
+for i=1:length(LabConfMatLab)
+    indSub=i;
+    Acc_Lab1Lab2(i,:)=calc_classacc(LabConfMatLab{indSub});
+    Acc_Lab1Home(i,:)=calc_classacc(LabConfMatHome{indSub});
+end
+
+subjinds=cellfun(@(x) ~isempty(x), LabHomeConfMatHome(:,1));
+subjinds=subjinds & permute(subjs_w_All,[3 2 1]);
+subjinds=find(subjinds);
+for i=1:length(subjinds)
+    indSub=subjinds(i);
+    
+    Acc_HomeHome(i,:)=calc_classacc(HometoHome{indSub});
+    HometoHome_sub=cat(3,HometoHome{indSub,:});
+    Acc_HomeHome(i,:)=calc_classacc(sum(HometoHome_sub,3));
+end
+
+% Box plots: Environment-specific
+BalAcc_Lab1Lab2=nanmean(Acc_Lab1Lab2,2);
+BalAcc_Lab1Home=nanmean(Acc_Lab1Home,2);
+BalAcc_HomeHome=nanmean(Acc_HomeHome,2);
+
+subplot(2,3,4)
+boxplot([Acc_Lab1Lab2(:,Act_order2) BalAcc_Lab1Lab2]);
+ylim([0 1.1]);
+title('Lab to Lab');
+
+subplot(2,3,5)
+boxplot([Acc_Lab1Home(:,Act_order2) BalAcc_Lab1Home]);
+ylim([0 1.1]);
+title('Lab to Home');
+
+subplot(2,3,6)
+boxplot([Acc_HomeHome(:,Act_order2) BalAcc_HomeHome]);
+ylim([0 1.1]);
+title('Home to Home');
+

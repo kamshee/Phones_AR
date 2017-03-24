@@ -94,7 +94,7 @@ BalAcc_HH=zeros(nHealthy-2,nRand);
 Acc_HS=zeros(nHealthy-2,nRand);
 BalAcc_HS=zeros(nHealthy-2,nRand);
 
-parfor ssSubj=8:nHealthy-2 % sample size of testing subjects; always training on at least 2
+parfor ssSubj=1:7%nHealthy-2 % sample size of testing subjects; always training on at least 2
     [~, randSubjMat] = sort(rand(nHealthy,nRand)); % nRand columns for random permutations of all subjects
     for indRand=1:nRand
         
@@ -174,9 +174,6 @@ parfor ssSubj=8:nHealthy-2 % sample size of testing subjects; always training on
             
 
         end
-
-        
-        
     end %indRand
     fprintf('Completed! Testing sample size %i \n',ssSubj);
 end %ssSubj
