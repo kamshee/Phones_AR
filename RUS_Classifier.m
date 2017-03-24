@@ -2,7 +2,7 @@
 
 clear all
 
-ntrees=200;
+ntrees=100;
 
 rmvFeat=1;
 if rmvFeat
@@ -56,8 +56,8 @@ for indSubj=1:length(AllFeat)
     FeatTest=Features(TestInd,FeatInds+1);
     LabelTest=Labels(TestInd);
 
-    t = templateTree('MinLeafSize',5);
-    RFModel=fitensemble(FeatTrain,LabelTrain,'RUSBoost',ntrees,t,'LearnRate',0.1);
+    t = templateTree('MinLeafSize',1);
+    RFModel=fitensemble(FeatTrain,LabelTrain,'RUSBoost',ntrees,t,'LearnRate',1);
     LabelsRF = predict(RFModel,FeatTest);
 
     %figure; plot(loss(RFModel,FeatTest,LabelTest,'mode','cumulative'))
