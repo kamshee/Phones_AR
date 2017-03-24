@@ -32,7 +32,7 @@ end
 
 % Ellipses only
 figure(101);
-minX=-40; maxX=40; minY=-20; maxY=20;
+minX=-40; maxX=40; minY=-40; maxY=40;
 for indAct=1:numAct
     
     subplot(numRow,numCol,indAct); hold on;
