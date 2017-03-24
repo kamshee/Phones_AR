@@ -4,7 +4,6 @@ close all
 
 Act_Stat = {'Lying','Sitting','Standing'};
 Act_Amb = {'Walking','Stairs Up','Stairs Down'};
-Act_All = {'Lying','Sitting','Standing','Walking','Stairs'};
 
 Env = {'Lab1','Lab2','Home'};
 
@@ -45,7 +44,7 @@ isSitting.Lab1 = ismember(FeatAct.Lab1,'Sitting')';
 isStanding.Lab1 = ismember(FeatAct.Lab1,'Standing')';
 isWalking.Lab1 = ismember(FeatAct.Lab1,'Walking')';
 isStairs.Lab1 = ismember(FeatAct.Lab1,{'Stairs Up','Stairs Down'})';
-
+isLyingSitting.Lab1 = ismember(FeatAct.Lab1,{'Lying','Sitting'})';
 
 %% Load Lab2
 load('Z:\RERC- Phones\Stroke\Clips\Test_Feat.mat')
@@ -77,6 +76,7 @@ isSitting.Lab2 = ismember(FeatAct.Lab2,'Sitting')';
 isStanding.Lab2 = ismember(FeatAct.Lab2,'Standing')';
 isWalking.Lab2 = ismember(FeatAct.Lab2,'Walking')';
 isStairs.Lab2 = ismember(FeatAct.Lab2,{'Stairs Up','Stairs Down'})';
+isLyingSitting.Lab2 = ismember(FeatAct.Lab2,{'Lying','Sitting'})';
 
 %% Load Home
 load('Z:\RERC- Phones\Stroke\Clips\Home_Feat.mat')
@@ -108,6 +108,7 @@ isSitting.Home = ismember(FeatAct.Home,'Sitting')';
 isStanding.Home = ismember(FeatAct.Home,'Standing')';
 isWalking.Home = ismember(FeatAct.Home,'Walking')';
 isStairs.Home = ismember(FeatAct.Home,{'Stairs Up','Stairs Down'})';
+isLyingSitting.Home = ismember(FeatAct.Home,{'Lying','Sitting'})';
 
 %% All Features
 AllEnv = vertcat(Lab1,Lab2,Home);
@@ -120,6 +121,7 @@ AllEnv_Sitting = AllEnv(vertcat(isSitting.Lab1,isSitting.Lab2,isSitting.Home),:)
 AllEnv_Standing = AllEnv(vertcat(isStanding.Lab1,isStanding.Lab2,isStanding.Home),:);
 AllEnv_Walking = AllEnv(vertcat(isWalking.Lab1,isWalking.Lab2,isWalking.Home),:);
 AllEnv_Stairs = AllEnv(vertcat(isStairs.Lab1,isStairs.Lab2,isStairs.Home),:);
+AllEnv_LyingSitting = AllEnv(vertcat(isLyingSitting.Lab1,isLyingSitting.Lab2,isLyingSitting.Home),:);
 
 
 %% Indices in All Features
@@ -158,6 +160,11 @@ ind_Lab1.Stairs = 1:length(ind_Lab1.All(isStairs.Lab1~=0));
 ind_Lab2.Stairs = ind_Lab1.Stairs(end)+1:ind_Lab1.Stairs(end)+length(ind_Lab2.All(isStairs.Lab2~=0));
 ind_Home.Stairs = ind_Lab2.Stairs(end)+1:ind_Lab2.Stairs(end)+length(ind_Home.All(isStairs.Home~=0));
 
+% Lying+Sitting
+ind_Lab1.LyingSitting = 1:length(ind_Lab1.All(isLyingSitting.Lab1~=0));
+ind_Lab2.LyingSitting = ind_Lab1.LyingSitting(end)+1:ind_Lab1.LyingSitting(end)+length(ind_Lab2.All(isLyingSitting.Lab2~=0));
+ind_Home.LyingSitting = ind_Lab2.LyingSitting(end)+1:ind_Lab2.LyingSitting(end)+length(ind_Home.All(isLyingSitting.Home~=0));
+
 %% PCA: Stationary vs. Ambulatory
 [coeff.Stat,score.Stat,latent.Stat,tsquared.Stat,explained.Stat,mu.Stat] = pca(zscore(AllEnv_Stat));
 [coeff.Amb,score.Amb,latent.Amb,tsquared.Amb,explained.Amb,mu.Amb] = pca(zscore(AllEnv_Amb));
@@ -195,14 +202,21 @@ xlabel('Component 1'); ylabel('Component 2'); zlabel('Component 3');
 title('Ambulatory (3-D)')
 
 %% PCA: Each Activity
+
+%Act_All = {'Lying','Sitting','Standing','Walking','Stairs'};
+Act_All = {'LyingSitting','Standing','Walking','Stairs'};
+
+numAct = length(Act_All);
+
 [coeff.Lying,score.Lying,latent.Lying,tsquared.Lying,explained.Lying,mu.Lying] = pca(zscore(AllEnv_Lying));
 [coeff.Sitting,score.Sitting,latent.Sitting,tsquared.Sitting,explained.Sitting,mu.Sitting] = pca(zscore(AllEnv_Sitting));
 [coeff.Standing,score.Standing,latent.Standing,tsquared.Standing,explained.Standing,mu.Standing] = pca(zscore(AllEnv_Standing));
 [coeff.Walking,score.Walking,latent.Walking,tsquared.Walking,explained.Walking,mu.Walking] = pca(zscore(AllEnv_Walking));
 [coeff.Stairs,score.Stairs,latent.Stairs,tsquared.Stairs,explained.Stairs,mu.Stairs] = pca(zscore(AllEnv_Stairs));
+[coeff.LyingSitting,score.LyingSitting,latent.LyingSitting,tsquared.LyingSitting,explained.LyingSitting,mu.LyingSitting] = pca(zscore(AllEnv_LyingSitting));
 
 % Subject means
-for indAct=1:length(Act_All)
+for indAct=1:numAct
     % Initialize
     eval(['score.bySub.' Act_All{indAct} '=cell(length(AllFeat),length(Env),2);']);  % Each value (cell)
     eval(['score.bySub.' Act_All{indAct} 'mean=NaN*ones(length(AllFeat),length(Env),2);']);  % Mean (matrix)
@@ -228,90 +242,24 @@ for indAct=1:length(Act_All)
     end
 end
 
-%% Plot PCA: Activities, Each value
+plotpca_byAct(score, ind_Lab1,ind_Lab2,ind_Home, Act_All )
+
+% Percent variance explained by PCs
 figure;
+numRow=2;
+numCol=ceil(numAct/2);
+for indAct=1:numAct
+    eval(['percExp = [explained.' Act_All{indAct} '(1); explained.' Act_All{indAct} '(2)];']);
 
-% Lying
-subplot(2,3,1); title('Lying')
-    hold on;
-    plot(score.Lying(ind_Lab1.Lying,1),score.Lying(ind_Lab1.Lying,2),'k+');
-    plot(score.Lying(ind_Lab2.Lying,1),score.Lying(ind_Lab2.Lying,2),'b+');
-    plot(score.Lying(ind_Home.Lying,1),score.Lying(ind_Home.Lying,2),'r+')
-    xlabel('Component 1'); ylabel('Component 2');
-    legend('Lab1','Lab2','Home')
+    subplot(numRow,numCol,indAct);
+        bar(percExp);
+        xt = get(gca, 'XTick');
+        text(xt, percExp, num2str(percExp,'%0.2f'), 'HorizontalAlignment','center', 'VerticalAlignment','bottom')
 
-% Sitting
-subplot(2,3,2); title('Sitting');
-    hold on;
-    plot(score.Sitting(ind_Lab1.Sitting,1),score.Sitting(ind_Lab1.Sitting,2),'k+');
-    plot(score.Sitting(ind_Lab2.Sitting,1),score.Sitting(ind_Lab2.Sitting,2),'b+');
-    plot(score.Sitting(ind_Home.Sitting,1),score.Sitting(ind_Home.Sitting,2),'r+')
-    xlabel('Component 1'); ylabel('Component 2');
-
-% Standing
-subplot(2,3,3); title('Standing')
-    hold on;
-    plot(score.Standing(ind_Lab1.Standing,1),score.Standing(ind_Lab1.Standing,2),'k+');
-    plot(score.Standing(ind_Lab2.Standing,1),score.Standing(ind_Lab2.Standing,2),'b+');
-    plot(score.Standing(ind_Home.Standing,1),score.Standing(ind_Home.Standing,2),'r+')
-    xlabel('Component 1'); ylabel('Component 2');
-
-% Walking
-subplot(2,3,4); title('Walking')
-    hold on;
-    plot(score.Walking(ind_Lab1.Walking,1),score.Walking(ind_Lab1.Walking,2),'k+');
-    plot(score.Walking(ind_Lab2.Walking,1),score.Walking(ind_Lab2.Walking,2),'b+');
-    plot(score.Walking(ind_Home.Walking,1),score.Walking(ind_Home.Walking,2),'r+')
-    xlabel('Component 1'); ylabel('Component 2');
-
-% Stairs
-subplot(2,3,5); title('Stairs')
-    hold on;
-    plot(score.Stairs(ind_Lab1.Stairs,1),score.Stairs(ind_Lab1.Stairs,2),'k+');
-    plot(score.Stairs(ind_Lab2.Stairs,1),score.Stairs(ind_Lab2.Stairs,2),'b+');
-    plot(score.Stairs(ind_Home.Stairs,1),score.Stairs(ind_Home.Stairs,2),'r+')
-    xlabel('Component 1'); ylabel('Component 2');
-    
-figure;
-
-% Lying
-subplot(2,3,1); title('Lying')
-    hold on;
-    plot(score.bySub.Lyingmean(:,1,1),score.bySub.Lyingmean(:,1,2),'ks','MarkerFaceColor','k','MarkerSize',8)
-    plot(score.bySub.Lyingmean(:,2,1),score.bySub.Lyingmean(:,2,2),'bs','MarkerFaceColor','b','MarkerSize',8)
-    plot(score.bySub.Lyingmean(:,3,1),score.bySub.Lyingmean(:,3,2),'rs','MarkerFaceColor','r','MarkerSize',8)
-    legend('Lab1','Lab2','Home')
-
-subplot(2,3,2); title('Sitting');
-    hold on;
-    plot(score.Sitting(ind_Lab1.Sitting,1),score.Sitting(ind_Lab1.Sitting,2),'k+');
-    plot(score.Sitting(ind_Lab2.Sitting,1),score.Sitting(ind_Lab2.Sitting,2),'b+');
-    plot(score.Sitting(ind_Home.Sitting,1),score.Sitting(ind_Home.Sitting,2),'r+')
-    xlabel('Component 1'); ylabel('Component 2');
-
-% Stadning
-subplot(2,3,3); title('Standing')
-    hold on;
-    plot(score.Standing(ind_Lab1.Standing,1),score.Standing(ind_Lab1.Standing,2),'k+');
-    plot(score.Standing(ind_Lab2.Standing,1),score.Standing(ind_Lab2.Standing,2),'b+');
-    plot(score.Standing(ind_Home.Standing,1),score.Standing(ind_Home.Standing,2),'r+')
-    xlabel('Component 1'); ylabel('Component 2');
-
-% Walking
-subplot(2,3,4); title('Walking')
-    hold on;
-    plot(score.Walking(ind_Lab1.Walking,1),score.Walking(ind_Lab1.Walking,2),'k+');
-    plot(score.Walking(ind_Lab2.Walking,1),score.Walking(ind_Lab2.Walking,2),'b+');
-    plot(score.Walking(ind_Home.Walking,1),score.Walking(ind_Home.Walking,2),'r+')
-    xlabel('Component 1'); ylabel('Component 2');
-
-% Stairs
-subplot(2,3,5); title('Stairs')
-    hold on;
-    plot(score.Stairs(ind_Lab1.Stairs,1),score.Stairs(ind_Lab1.Stairs,2),'k+');
-    plot(score.Stairs(ind_Lab2.Stairs,1),score.Stairs(ind_Lab2.Stairs,2),'b+');
-    plot(score.Stairs(ind_Home.Stairs,1),score.Stairs(ind_Home.Stairs,2),'r+')
-    xlabel('Component 1'); ylabel('Component 2');
+        ylabel('% explained'); xlabel('Component');
+        axis([0 3 0 30])
+        title(Act_All(indAct));
+end
 
 %% PCA: All
 % [coeff,score,latent,tsquared,explained,mu] = pca(AllEnv);
