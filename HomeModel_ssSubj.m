@@ -8,34 +8,30 @@ ntrees=200;
 %% Load Home Data
 
 Activities={'Sitting', 'Standing', 'Walking', 'Stair'};
+Subjs=[11 17:19 24 27];
 
 load('Z:\RERC- Phones\Stroke\Clips\Home_Feat.mat')
 Home_StrokeFeatures=[];
 Home_StrokeLabels={};
 
-n=0;
-
-for indSubj=1:length(AllFeat)
-    tempLabels=AllFeat(indSubj).ActivityLabel;
+for indSubj=1:length(Subjs)
+    tempLabels=AllFeat(Subjs(indSubj)).ActivityLabel;
     
-    ly_inds=strcmp('Lying',tempLabels);
-    tempLabels(ly_inds)={'Sitting'};
-
-    st_inds=strmatch('Stairs ',tempLabels);
-    tempLabels(st_inds)={'Stair'};
-    
-    if ~all(cellfun(@(x) sum(strcmp(x,tempLabels))>59, Activities))
-        continue
-    end
-    n=n+1;
     % Vector in first column of TestFeatures indexes subjects
-    SubjectV=ones(length(tempLabels),1)*n; 
-    Home_StrokeFeatures(end+1:end+length(tempLabels),:)=[SubjectV AllFeat(indSubj).Features(:,:)];
+    SubjectV=ones(length(tempLabels),1)*indSubj; 
+    Home_StrokeFeatures(end+1:end+length(tempLabels),:)=[SubjectV AllFeat(Subjs(indSubj)).Features(:,:)];
     Home_StrokeLabels=[Home_StrokeLabels tempLabels];
 end
+
+ly_inds=strcmp('Lying',Home_StrokeLabels);
+Home_StrokeLabels(ly_inds)={'Sitting'};
+
+st_inds=strmatch('Stairs ',Home_StrokeLabels);
+Home_StrokeLabels(st_inds)={'Stair'};
+
 Home_StrokeLabels=Home_StrokeLabels.';
 
-nHome=n;
+nHome=length(Subjs);
 
 %%
 nRand=1000;
@@ -44,7 +40,7 @@ nInst=500;
 Acc_HH=zeros(nHome-1,nRand);
 BalAcc_HH=zeros(nHome-1,nRand);
 
-parfor ssSubj=1:nHome-1 % loop over number of test subjects to reserve
+for ssSubj=1:nHome-1 % loop over number of test subjects to reserve
     [~, randSubjMat] = sort(rand(nHome,nRand)); % nRand columns for random permutations of all subjects
     for indRand=1:nRand
         

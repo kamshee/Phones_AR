@@ -11,13 +11,14 @@ Lab2_StrokeFeatures=[];
 Lab2_StrokeLabels={};
 
 Activities={'Sitting', 'Standing', 'Walking', 'Stair'};
+Subjs=[11 17:19 24 27];
 
-for indSubj=1:length(AllFeat) %[1:13 15:length(AllFeat)]
-    tempTestLabels=AllFeat(indSubj).ActivityLabel;
+for indSubj=1:length(Subjs) %[1:13 15:length(AllFeat)]
+    tempTestLabels=AllFeat(Subjs(indSubj)).ActivityLabel;
     
     % Vector in first column of TestFeatures indexes subjects
     SubjectV=ones(length(tempTestLabels),1)*indSubj; 
-    Lab2_StrokeFeatures(end+1:end+length(tempTestLabels),:)=[SubjectV AllFeat(indSubj).Features(:,:)];
+    Lab2_StrokeFeatures(end+1:end+length(tempTestLabels),:)=[SubjectV AllFeat(Subjs(indSubj)).Features(:,:)];
     Lab2_StrokeLabels=[Lab2_StrokeLabels tempTestLabels];
 end
 Lab2_StrokeLabels=Lab2_StrokeLabels.';
@@ -28,20 +29,18 @@ Lab2_StrokeLabels(ly_inds)={'Sitting'};
 st_inds=strmatch('Stairs ',Lab2_StrokeLabels);
 Lab2_StrokeLabels(st_inds)={'Stair'};
 
-nStroke=length(AllFeat);
-
 load('Z:\RERC- Phones\Stroke\Clips\Train_Feat.mat')
 Lab1_StrokeFeatures=[];
 Lab1_StrokeLabels={};
 
-nStroke=length(AllFeat);
+nStroke=length(Subjs);
 
-for indSubj=1:length(AllFeat)
-    tempTestLabels=AllFeat(indSubj).ActivityLabel;
+for indSubj=1:length(Subjs)
+    tempTestLabels=AllFeat(Subjs(indSubj)).ActivityLabel;
     
     % Vector in first column of TestFeatures indexes subjects
     SubjectV=ones(length(tempTestLabels),1)*indSubj; 
-    Lab1_StrokeFeatures(end+1:end+length(tempTestLabels),:)=[SubjectV AllFeat(indSubj).Features(:,:)];
+    Lab1_StrokeFeatures(end+1:end+length(tempTestLabels),:)=[SubjectV AllFeat(Subjs(indSubj)).Features(:,:)];
     Lab1_StrokeLabels=[Lab1_StrokeLabels tempTestLabels];
 end
 Lab1_StrokeLabels=Lab1_StrokeLabels.';
@@ -57,12 +56,12 @@ load('Z:\RERC- Phones\Stroke\Clips\Home_Feat.mat')
 Home_StrokeFeatures=[];
 Home_StrokeLabels={};
 
-for indSubj=1:length(AllFeat)
-    tempTestLabels=AllFeat(indSubj).ActivityLabel;
+for indSubj=1:length(Subjs)
+    tempTestLabels=AllFeat(Subjs(indSubj)).ActivityLabel;
     
     % Vector in first column of TestFeatures indexes subjects
     SubjectV=ones(length(tempTestLabels),1)*indSubj; 
-    Home_StrokeFeatures(end+1:end+length(tempTestLabels),:)=[SubjectV AllFeat(indSubj).Features(:,:)];
+    Home_StrokeFeatures(end+1:end+length(tempTestLabels),:)=[SubjectV AllFeat(Subjs(indSubj)).Features(:,:)];
     Home_StrokeLabels=[Home_StrokeLabels tempTestLabels];
 end
 Home_StrokeLabels=Home_StrokeLabels.';
@@ -83,11 +82,8 @@ BalAcc_LL=zeros(nStroke-2,nRand);
 Acc_LH=zeros(nStroke-2,nRand);
 BalAcc_LH=zeros(nStroke-2,nRand);
 
-parfor ssSubj=nStroke-12:nStroke-2 % loop over number of test subjects to reserve
-    [~, randSubjMat] = sort(rand(nStroke-3,nRand)); % nRand columns for random permutations of all subjects
-    % adjust values for removed subjects
-    randSubjMat=randSubjMat+1; randSubjMat(randSubjMat>13)=randSubjMat(randSubjMat>13)+1;
-    randSubjMat(randSubjMat>20)=randSubjMat(randSubjMat>20)+1;
+for ssSubj=1:nStroke-1 % loop over number of test subjects to reserve
+    [~, randSubjMat] = sort(rand(nStroke,nRand)); % nRand columns for random permutations of all subjects
     for indRand=1:nRand
         
         % Lab 1 trained model
