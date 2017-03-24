@@ -3,6 +3,8 @@
 load NormImp
 FeatInds=find(norm_imp>.25);
 
+ntrees=200;
+
 %% Load Home Data
 
 Activities={'Sitting', 'Standing', 'Walking', 'Stair'};
@@ -22,14 +24,14 @@ for indSubj=1:length(AllFeat)
     st_inds=strmatch('Stairs ',tempLabels);
     tempLabels(st_inds)={'Stair'};
     
-    if ~all(cellfun(@(x) sum(strcmp(x,tempLabels))>59, Activities)
+    if ~all(cellfun(@(x) sum(strcmp(x,tempLabels))>59, Activities))
         continue
     end
     n=n+1;
     % Vector in first column of TestFeatures indexes subjects
-    SubjectV=ones(length(tempTestLabels),1)*n; 
-    Home_StrokeFeatures(end+1:end+length(tempTestLabels),:)=[SubjectV AllFeat(indSubj).Features(:,:)];
-    Home_StrokeLabels=[Home_StrokeLabels tempTestLabels];
+    SubjectV=ones(length(tempLabels),1)*n; 
+    Home_StrokeFeatures(end+1:end+length(tempLabels),:)=[SubjectV AllFeat(indSubj).Features(:,:)];
+    Home_StrokeLabels=[Home_StrokeLabels tempLabels];
 end
 Home_StrokeLabels=Home_StrokeLabels.';
 
@@ -74,3 +76,5 @@ parfor ssSubj=1:nHome-1 % loop over number of test subjects to reserve
     end %indRand
     fprintf('Completed! Testing sample size %i \n',ssSubj);
 end %ssSubj
+
+save('ssBalAcc_Stroke_HometoHome.mat','Acc_HH','BalAcc_HH');
