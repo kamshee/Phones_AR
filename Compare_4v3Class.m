@@ -29,8 +29,12 @@ Home=AllFeat;
 for i=1:length(Home)
     for j=1:length(Activities)
         counts(j)=sum(strcmp(Home(i).ActivityLabel,Activities{j}));
+        countsLab2(j)=sum(strcmp(Test(i).ActivityLabel,Activities{j}));
+        countsLab1(j)=sum(strcmp(Train(i).ActivityLabel,Activities{j}));
     end
-    Subjs_w_All(i)=all([counts(1)+counts(2) counts(3) counts(4)+counts(5)+counts(6)]);
+    Subjs_w_All(i)=all([counts(1)+counts(2) counts(3) counts(4)+counts(5) counts(6)])...
+        & all([countsLab2(1)+countsLab2(2) countsLab2(3) countsLab2(4)+countsLab2(5) countsLab2(6)])...
+        & all([countsLab1(1)+countsLab1(2) countsLab1(3) countsLab1(4)+countsLab1(5) countsLab1(6)]);
 end
 
 Feat=[];
@@ -40,9 +44,9 @@ HomeInds=[];
 Lab2Inds=[];
 
 for i=1:length(Train)
-%     if ~Subjs_w_All(i)
-%         continue
-%     end
+    if ~Subjs_w_All(i)
+        continue
+    end
     Feat=[Feat; Train(i).Features];
     Label=[Label Train(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Train(i).ActivityLabel)])];
@@ -51,33 +55,33 @@ for i=1:length(Train)
 end
 
 for i=1:length(Test)
-%     if ~Subjs_w_All(i)
-%         continue
-%     end
+    if ~Subjs_w_All(i)
+        continue
+    end
     Feat=[Feat; Test(i).Features];
     Label=[Label Test(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Test(i).ActivityLabel)])];
     HomeInds=[HomeInds zeros(1,length(Test(i).ActivityLabel))];
-    Lab2Inds=[Lab2Inds ones(1,length(Home(i).ActivityLabel))];
+    Lab2Inds=[Lab2Inds ones(1,length(Test(i).ActivityLabel))];
 end
 
 for i=1:length(Home)
-%     if ~Subjs_w_All(i)
-%         continue
-%     end
+    if ~Subjs_w_All(i)
+        continue
+    end
     Feat=[Feat; Home(i).Features];
     Label=[Label Home(i).ActivityLabel];
     Subjs=[Subjs repmat(i,[1 length(Home(i).ActivityLabel)])];
     HomeInds=[HomeInds ones(1,length(Home(i).ActivityLabel))];
-    Lab2Inds=[Lab2Inds zeros(1,length(Train(i).ActivityLabel))];
+    Lab2Inds=[Lab2Inds zeros(1,length(Home(i).ActivityLabel))];
 end
 
 for indFold=1:length(Home)
     disp(indFold)
 
-%     if size(Home(indFold).Features,1)<60 || ~Subjs_w_All(indFold)
-%         continue
-%     end
+    if size(Home(indFold).Features,1)<60 || ~Subjs_w_All(indFold)
+        continue
+    end
     
     %% Combine Sitting/Lying and Stairs Up/Down for environmental models
     
@@ -89,29 +93,28 @@ for indFold=1:length(Home)
     
     Envir_Activities={'Sitting', 'Standing', 'Walking', 'Stair'};
     
-    TrainFeat=Feat(~HomeInds & ~Lab2Inds & Subjs~=indFold,:);
+    TrainFeat=Feat(~HomeInds & ~Lab2Inds & Subjs~=indFold,FeatInds);
     TrainLabel=Label(~HomeInds & ~Lab2Inds & Subjs~=indFold).';
     TempSubjs=Subjs(~HomeInds & ~Lab2Inds & Subjs~=indFold);
     
-    TestFeat=Feat(HomeInds & Subjs==indFold,:);
+%     RUS_inds=[];
+%     for i=1:length(Envir_Activities)
+%         train_act_inds=find(strcmp(TrainLabel,Envir_Activities{i}));
+%         RUS_inds=[RUS_inds; train_act_inds(randperm(length(train_act_inds),1000))];
+%     end
+%     TrainFeat=TrainFeat(RUS_inds,:);
+%     TrainLabel=TrainLabel(RUS_inds);
+    
+    
+    TestFeat=Feat(HomeInds & Subjs==indFold,FeatInds);
     TestLabel=Label(HomeInds & Subjs==indFold);     
     TestLabel=TestLabel.';
-
-    % Don't test on activities that have less than 60 instances for this subject
-    
-    for i=1:length(Activities)
-        act_counts=sum(strcmp(Activities(i),TestLabel));
-        if act_counts<60
-            act_inds=strcmp(Activities(i),TestLabel);
-            TestFeat(act_inds,:)=[];
-            TestLabel(act_inds)=[];
-        end
-    end
     
     t = templateTree('MinLeafSize',5);
     RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',1);
+%     RFModel=TreeBagger(200,TrainFeat,TrainLabel);
     
-    TestFeatLab=Feat(Lab2Inds & Subjs==indFold,:);
+    TestFeatLab=Feat(Lab2Inds & Subjs==indFold,FeatInds);
     TestLabelLab=Label(Lab2Inds & Subjs==indFold);     
     TestLabelLab=TestLabelLab.';
     
@@ -125,7 +128,20 @@ for indFold=1:length(Home)
     LabelsRF = predict(RFModel,TestFeat);
     LabConfMatHome{indFold}=confusionmat(TestLabel, LabelsRF, 'order', Envir_Activities);
     
+    TrainFeat=Feat(HomeInds & Subjs~=indFold,FeatInds);
+    TrainLabel=Label(HomeInds & Subjs~=indFold).';
+    TempSubjs=Subjs(HomeInds & Subjs~=indFold);
+    
+%     RUS_inds=[];
+%     for i=1:length(Envir_Activities)
+%         train_act_inds=find(strcmp(TrainLabel,Envir_Activities{i}));
+%         RUS_inds=[RUS_inds; train_act_inds(randperm(length(train_act_inds),1000))];
+%     end
+%     TrainFeat=TrainFeat(RUS_inds,:);
+%     TrainLabel=TrainLabel(RUS_inds);
+
     RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',1);
+%     RFModel=TreeBagger(200,TrainFeat,TrainLabel);
     LabelsRF = predict(RFModel,TestFeat);
     HomeConfMatHome{indFold}=confusionmat(TestLabel, LabelsRF, 'order', Envir_Activities);
     
@@ -136,9 +152,9 @@ save 4Class LabConfMatLab LabConfMatHome HomeConfMatHome
 for indFold=1:length(Home)
     disp(indFold)
 
-%     if size(Home(indFold).Features,1)<60 || ~Subjs_w_All(indFold)
-%         continue
-%     end
+    if size(Home(indFold).Features,1)<60 || ~Subjs_w_All(indFold)
+        continue
+    end
     
     %% Combine Sitting/Lying and Stairs Up/Down for environmental models
     
@@ -150,29 +166,28 @@ for indFold=1:length(Home)
     
     Envir_Activities={'Sitting', 'Standing', 'Walking'};
     
-        TrainFeat=Feat(~HomeInds & ~Lab2Inds & Subjs~=indFold,:);
+    TrainFeat=Feat(~HomeInds & ~Lab2Inds & Subjs~=indFold,FeatInds);
     TrainLabel=Label(~HomeInds & ~Lab2Inds & Subjs~=indFold).';
     TempSubjs=Subjs(~HomeInds & ~Lab2Inds & Subjs~=indFold);
     
-    TestFeat=Feat(HomeInds & Subjs==indFold,:);
+%     RUS_inds=[];
+%     for i=1:length(Envir_Activities)
+%         train_act_inds=find(strcmp(TrainLabel,Envir_Activities{i}));
+%         RUS_inds=[RUS_inds; train_act_inds(randperm(length(train_act_inds),1000))];
+%     end
+%     TrainFeat=TrainFeat(RUS_inds,:);
+%     TrainLabel=TrainLabel(RUS_inds);
+    
+    
+    TestFeat=Feat(HomeInds & Subjs==indFold,FeatInds);
     TestLabel=Label(HomeInds & Subjs==indFold);     
     TestLabel=TestLabel.';
-
-    % Don't test on activities that have less than 60 instances for this subject
-    
-    for i=1:length(Activities)
-        act_counts=sum(strcmp(Activities(i),TestLabel));
-        if act_counts<60
-            act_inds=strcmp(Activities(i),TestLabel);
-            TestFeat(act_inds,:)=[];
-            TestLabel(act_inds)=[];
-        end
-    end
     
     t = templateTree('MinLeafSize',5);
     RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',1);
+%     RFModel=TreeBagger(200,TrainFeat,TrainLabel);
     
-    TestFeatLab=Feat(Lab2Inds & Subjs==indFold,:);
+    TestFeatLab=Feat(Lab2Inds & Subjs==indFold,FeatInds);
     TestLabelLab=Label(Lab2Inds & Subjs==indFold);     
     TestLabelLab=TestLabelLab.';
     
@@ -186,7 +201,20 @@ for indFold=1:length(Home)
     LabelsRF = predict(RFModel,TestFeat);
     LabConfMatHome{indFold}=confusionmat(TestLabel, LabelsRF, 'order', Envir_Activities);
     
+    TrainFeat=Feat(HomeInds & Subjs~=indFold,FeatInds);
+    TrainLabel=Label(HomeInds & Subjs~=indFold).';
+    TempSubjs=Subjs(HomeInds & Subjs~=indFold);
+    
+%     RUS_inds=[];
+%     for i=1:length(Envir_Activities)
+%         train_act_inds=find(strcmp(TrainLabel,Envir_Activities{i}));
+%         RUS_inds=[RUS_inds; train_act_inds(randperm(length(train_act_inds),1000))];
+%     end
+%     TrainFeat=TrainFeat(RUS_inds,:);
+%     TrainLabel=TrainLabel(RUS_inds);
+
     RFModel=fitensemble(TrainFeat,TrainLabel,'RUSBoost',ntrees,t,'LearnRate',1);
+%     RFModel=TreeBagger(200,TrainFeat,TrainLabel);
     LabelsRF = predict(RFModel,TestFeat);
     HomeConfMatHome{indFold}=confusionmat(TestLabel, LabelsRF, 'order', Envir_Activities);
     
