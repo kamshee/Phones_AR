@@ -24,7 +24,7 @@ for indSubj=1:length(AllFeat)
     st_inds=strmatch('Stairs ',tempLabels);
     tempLabels(st_inds)={'Stair'};
     
-    if ~all(cellfun(@(x) sum(strcmp(x,tempLabels))>59, Activities))
+    if isempty(AllFeat(indSubj).Features) %~all(cellfun(@(x) sum(strcmp(x,tempLabels))>59, Activities))
         continue
     end
     n=n+1;
@@ -44,7 +44,7 @@ nInst=500;
 Acc_HH=zeros(nHome-1,nRand);
 BalAcc_HH=zeros(nHome-1,nRand);
 
-parfor ssSubj=1:nHome-1 % loop over number of test subjects to reserve
+for ssSubj=1:nHome-2 % loop over number of test subjects to reserve
     [~, randSubjMat] = sort(rand(nHome,nRand)); % nRand columns for random permutations of all subjects
     for indRand=1:nRand
         
@@ -70,7 +70,7 @@ parfor ssSubj=1:nHome-1 % loop over number of test subjects to reserve
         Acc_HH(ssSubj,indRand)=sum(TPInd)/k;
 
         ConfMat_HH=confusionmat(LabelTest, LabelsRF,'Order',Activities);
-        BalAcc_HH(ssSubj,indRand) = mean(diag(ConfMat_HH)./sum(ConfMat_HH,2));
+        BalAcc_HH(ssSubj,indRand) = nanmean(diag(ConfMat_HH)./sum(ConfMat_HH,2));
         PredLabels_HH=LabelsRF;
         
     end %indRand
